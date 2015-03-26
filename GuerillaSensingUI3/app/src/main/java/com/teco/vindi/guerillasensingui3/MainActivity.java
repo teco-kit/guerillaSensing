@@ -2,16 +2,13 @@ package com.teco.vindi.guerillasensingui3;
 
 
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -20,8 +17,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import java.util.List;
@@ -77,8 +72,15 @@ public class MainActivity extends ActionBarActivity{
                 View child = recyclerView.findChildViewUnder(motionEvent.getX(),motionEvent.getY());
 
                 if(child!=null && mGestureDetector.onTouchEvent(motionEvent)){
-                    mDrawerLayout.closeDrawers();
-                    Toast.makeText(MainActivity.this,"Opening \""+ TITLES[recyclerView.getChildPosition(child) - 1] + "\"", Toast.LENGTH_SHORT).show();
+                    int childID = recyclerView.getChildPosition(child);
+                    if (childID == 0) {
+                        // Header was clicked.
+                        Toast.makeText(MainActivity.this, "Header clicked.", Toast.LENGTH_SHORT).show();
+                    } else {
+                        // Item was clicked.
+                        mDrawerLayout.closeDrawers();
+                        Toast.makeText(MainActivity.this, "Opening \"" + TITLES[childID - 1] + "\"", Toast.LENGTH_SHORT).show();
+                    }
                     return true;
 
                 }
