@@ -129,6 +129,8 @@ public class MainActivity extends ActionBarActivity{
         // mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
         mPagerTabs.setDistributeEvenly(true);
 
+        mPagerTabs.setSelectedIndicatorColors(Color.WHITE);
+
         startPaging();
         mPagerTabs.setViewPager(mPager);
 
