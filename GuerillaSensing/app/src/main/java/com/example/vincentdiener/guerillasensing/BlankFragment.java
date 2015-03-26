@@ -56,7 +56,7 @@ public class BlankFragment extends Fragment implements View.OnClickListener {
 
         try {
             // Add your data
-            List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
+            List<NameValuePair> nameValuePairs = new ArrayList< >(2);
             nameValuePairs.add(new BasicNameValuePair("mac", "A3:F3:38:27:36:16:26:37"));
             nameValuePairs.add(new BasicNameValuePair("lat", "3.12312312224"));
             nameValuePairs.add(new BasicNameValuePair("lon", "7.31274554754"));

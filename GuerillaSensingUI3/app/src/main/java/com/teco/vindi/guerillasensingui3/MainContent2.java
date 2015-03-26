@@ -1,0 +1,34 @@
+package com.teco.vindi.guerillasensingui3;
+
+
+import android.support.v4.app.Fragment;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+
+/**
+ * A simple {@link android.app.Fragment} subclass.
+ */
+public class MainContent2 extends Fragment {
+
+    private static String FRAGMENT_NAME = "Graph";
+
+    public MainContent2() {
+        // Required empty public constructor
+    }
+
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.layout.fragment_main_content2, container, false);
+    }
+
+    @Override
+    public String toString() {
+        return FRAGMENT_NAME;
+    }
+
+
+}
