@@ -139,4 +139,36 @@ public class DrawerAdapter extends RecyclerView.Adapter<DrawerAdapter.ViewHolder
         return position == 0;
     }
 
+    public void changeAt(int position) {
+        mNavTitles[position - 1] = "ddd";
+        notifyItemChanged(position);
+    }
+
+    public void removeAt(int position) {
+
+        int n = 0;
+        String[] newNavTitles = new String[mNavTitles.length - 1];
+        int[] newIcons = new int[mIcons.length - 1];
+
+        for (int i = 0; i < mNavTitles.length; i++) {
+            if (position - 1 != i) {
+                newNavTitles[n] = mNavTitles[i];
+                n++;
+            }
+        }
+
+        n = 0;
+        for (int i = 0; i < mIcons.length; i++) {
+            if (position - 1 != i) {
+                newIcons[n] = mIcons[i];
+                n++;
+            }
+        }
+
+        mNavTitles = newNavTitles.clone();
+        mIcons = newIcons.clone();
+
+        notifyItemRemoved(position);
+        notifyItemRangeChanged(position, mNavTitles.length - 1);
+    }
 }

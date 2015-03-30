@@ -6,5 +6,6 @@
     <string name="action_settings">Settings</string>
     <string name="hello_blank_fragment_1">Hello blank fragment1</string>
     <string name="hello_blank_fragment_2">Hello blank fragment2</string>
+    <string name="title_activity_start_menu">StartMenuActivity</string>
 
 </resources>

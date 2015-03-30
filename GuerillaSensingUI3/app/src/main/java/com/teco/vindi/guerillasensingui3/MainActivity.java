@@ -12,6 +12,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -24,6 +25,8 @@ import java.util.Vector;
 
 
 public class MainActivity extends ActionBarActivity{
+
+    private static String TAG = "GuerillaSensing";
 
     private String[] mPlanetTitles;
     private DrawerLayout mDrawerLayout;
@@ -51,6 +54,11 @@ public class MainActivity extends ActionBarActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Replace action bar with material design app bar from support library.
+        // Menu items will automatically get added to this bar.
+        mToolBar = (Toolbar) findViewById(R.id.tool_bar);
+        setSupportActionBar(mToolBar);
+
         mGestureDetector = new GestureDetector(MainActivity.this, new GestureDetector.SimpleOnGestureListener() {
             @Override public boolean onSingleTapUp(MotionEvent e) {
                 return true;
@@ -58,8 +66,7 @@ public class MainActivity extends ActionBarActivity{
 
         });
 
-        mToolBar = (Toolbar) findViewById(R.id.tool_bar);
-        setSupportActionBar(mToolBar);
+
 
         mDrawerAdapter = new DrawerAdapter(TITLES,ICONS,NAME,EMAIL);
 
@@ -78,7 +85,9 @@ public class MainActivity extends ActionBarActivity{
                         Toast.makeText(MainActivity.this, "Header clicked.", Toast.LENGTH_SHORT).show();
                     } else {
                         // Item was clicked.
-                        mDrawerLayout.closeDrawers();
+                        View v = mDrawerList.getChildAt(childID);
+                        mDrawerAdapter.removeAt(childID);
+                        //mDrawerLayout.closeDrawers();
                         Toast.makeText(MainActivity.this, "Opening \"" + TITLES[childID - 1] + "\"", Toast.LENGTH_SHORT).show();
                     }
                     return true;
@@ -158,6 +167,8 @@ public class MainActivity extends ActionBarActivity{
     }
 
 
+
+    // Menus
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -176,6 +187,7 @@ public class MainActivity extends ActionBarActivity{
         if (id == R.id.action_settings) {
             return true;
         }
+
 
         return super.onOptionsItemSelected(item);
     }
