@@ -1,6 +1,5 @@
 package com.teco.vindi.guerillasensingui3;
 
-
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,13 +8,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-/**
- * Created by hp1 on 28-12-2014.
- */
 public class DrawerAdapter extends RecyclerView.Adapter<DrawerAdapter.ViewHolder> {
 
-    private static final int TYPE_HEADER = 0;  // Declaring Variable to Understand which View is being worked on
-    // IF the view under inflation and population is header or Item
+    // When inflating the items, we have to distinguish between the regular items and the header.
+    // This could be expanded to support more item types, a footer, etc.
+    private static final int TYPE_HEADER = 0;
     private static final int TYPE_ITEM = 1;
 
     private String mNavTitles[]; // String Array to store the passed titles Value from MainActivity.java

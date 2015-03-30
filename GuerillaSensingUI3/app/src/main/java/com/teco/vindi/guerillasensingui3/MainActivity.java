@@ -24,34 +24,60 @@ import java.util.List;
 import java.util.Vector;
 
 
-public class MainActivity extends ActionBarActivity{
+public class MainActivity extends ActionBarActivity {
 
-    private static String TAG = "GuerillaSensing";
+    // Class name for the debug log.
+    private static String TAG = "MainActivity";
 
-    private String[] mPlanetTitles;
-    private DrawerLayout mDrawerLayout;
-    private RecyclerView mDrawerList;
-    private PagerAdapter mPagerAdapter;
-    private DrawerAdapter mDrawerAdapter;
-    private ViewPager mPager;
-    private SlidingTabLayout mPagerTabs;
+
+    // The support app bar.
     private Toolbar mToolBar;
+
+    // Top layout for the main activity. Used to add the navigation drawer.
+    private DrawerLayout mDrawerLayout;
+
+    // Recycler view for the navigation drawer list.
+    private RecyclerView mSideMenuRecycler;
+
+    // Adapter for the navigation drawer recycler view.
+    private DrawerAdapter mSideMenuAdapter;
+
+    // App bar toggle icon ("hamburger").
     private ActionBarDrawerToggle mDrawerToggle;
 
 
+
+
+    //
+    private PagerAdapter mPagerAdapter;
+
+    //
+    private ViewPager mPager;
+
+    //
+    private SlidingTabLayout mPagerTabs;
+
+
+
+    // Data
     String TITLES[] = {"Map", "Login", "Add Device", "Edit Device", "Search Device", "BLE Service", "Config", "Contact", "Help"};
     int ICONS[] = {R.drawable.ic_map, R.drawable.ic_login, R.drawable.ic_add, R.drawable.ic_edit, R.drawable.ic_search,
             R.drawable.ic_bluetooth, R.drawable.ic_config, R.drawable.ic_contact, R.drawable.ic_help};
     String NAME = "Vincent Diener";
     String EMAIL = "vincent.diener@gmail.com";
-    //int PROFILE = R.drawable.aka;
+
+
 
     // Gesture detector. Only detects single tap.
     private GestureDetector mGestureDetector;
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Set activity content.
         setContentView(R.layout.activity_main);
 
         // Replace action bar with material design app bar from support library.
@@ -59,34 +85,48 @@ public class MainActivity extends ActionBarActivity{
         mToolBar = (Toolbar) findViewById(R.id.tool_bar);
         setSupportActionBar(mToolBar);
 
+        // Create
+        mSideMenuAdapter = new DrawerAdapter(TITLES, ICONS, NAME, EMAIL);
+
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mSideMenuRecycler = (RecyclerView) findViewById(R.id.left_drawer);
+
+        // Set the adapter for the list view
+        mSideMenuRecycler.setHasFixedSize(true);
+        LinearLayoutManager llm = new LinearLayoutManager(this);
+        llm.setOrientation(LinearLayoutManager.VERTICAL);
+        mSideMenuRecycler.setLayoutManager(llm);
+
+        mSideMenuAdapter = new DrawerAdapter(TITLES, ICONS, NAME, EMAIL);       // Creating the Adapter of MyAdapter class(which we are going to see in a bit)
+        mSideMenuRecycler.setAdapter(mSideMenuAdapter);
+
+        mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
+
+
         mGestureDetector = new GestureDetector(MainActivity.this, new GestureDetector.SimpleOnGestureListener() {
-            @Override public boolean onSingleTapUp(MotionEvent e) {
+            @Override
+            public boolean onSingleTapUp(MotionEvent e) {
                 return true;
             }
-
         });
 
 
 
-        mDrawerAdapter = new DrawerAdapter(TITLES,ICONS,NAME,EMAIL);
 
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mDrawerList = (RecyclerView) findViewById(R.id.left_drawer);
-
-        mDrawerList.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
+        mSideMenuRecycler.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
             @Override
             public boolean onInterceptTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
-                View child = recyclerView.findChildViewUnder(motionEvent.getX(),motionEvent.getY());
+                View child = recyclerView.findChildViewUnder(motionEvent.getX(), motionEvent.getY());
 
-                if(child!=null && mGestureDetector.onTouchEvent(motionEvent)){
+                if (child != null && mGestureDetector.onTouchEvent(motionEvent)) {
                     int childID = recyclerView.getChildPosition(child);
                     if (childID == 0) {
                         // Header was clicked.
                         Toast.makeText(MainActivity.this, "Header clicked.", Toast.LENGTH_SHORT).show();
                     } else {
                         // Item was clicked.
-                        View v = mDrawerList.getChildAt(childID);
-                        mDrawerAdapter.removeAt(childID);
+                        View v = mSideMenuRecycler.getChildAt(childID);
+                        mSideMenuAdapter.removeAt(childID);
                         //mDrawerLayout.closeDrawers();
                         Toast.makeText(MainActivity.this, "Opening \"" + TITLES[childID - 1] + "\"", Toast.LENGTH_SHORT).show();
                     }
@@ -103,23 +143,33 @@ public class MainActivity extends ActionBarActivity{
             }
         });
 
-        mDrawerToggle = new ActionBarDrawerToggle(this,mDrawerLayout,mToolBar,R.string.app_name,R.string.app_name) { // <---------- FIX THIS! TODO TODO TODO
+
+
+
+
+
+
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, mToolBar, R.string.app_name, R.string.app_name) {
 
             @Override
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
-                // code here will execute once the drawer is opened( As I dont want anything happened whe drawer is
-                // open I am not going to put anything here)
+                // Drawer was opened.
             }
 
             @Override
             public void onDrawerClosed(View drawerView) {
                 super.onDrawerClosed(drawerView);
-                // Code here will execute once drawer is closed
+                // Drawer was closed.
             }
-        }; // Drawer Toggle Object Made
+        };
+
         mDrawerLayout.setDrawerListener(mDrawerToggle); // Drawer Listener set to the Drawer toggle
         mDrawerToggle.syncState();               // Finally we set the drawer toggle sync State
+
+
+
+
 
 
 
@@ -128,14 +178,7 @@ public class MainActivity extends ActionBarActivity{
 
         mPagerTabs.setCustomTabView(R.layout.custom_tab_layout, R.id.tab_text);
 
-        // Set the adapter for the list view
-        mDrawerList.setHasFixedSize(true);
-        LinearLayoutManager llm = new LinearLayoutManager(this);
-        llm.setOrientation(LinearLayoutManager.VERTICAL);
-        mDrawerList.setLayoutManager(llm);
 
-        mDrawerAdapter = new DrawerAdapter(TITLES,ICONS,NAME,EMAIL);       // Creating the Adapter of MyAdapter class(which we are going to see in a bit)
-        mDrawerList.setAdapter(mDrawerAdapter);
         // Set the list's click listener
         // mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
         mPagerTabs.setDistributeEvenly(true);
@@ -146,10 +189,6 @@ public class MainActivity extends ActionBarActivity{
         mPagerTabs.setViewPager(mPager);
 
 
-
-        mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
-
-        
 
 
 
@@ -167,18 +206,16 @@ public class MainActivity extends ActionBarActivity{
     }
 
 
-
-    // Menus
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
+        // Inflate the menu; this adds items to the app bar.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
+        // Handle app bar item clicks here. The app bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
