@@ -4,8 +4,9 @@
     android:id="@+id/card_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    card_view:cardCornerRadius="4dp"
+    card_view:cardCornerRadius="3dp"
     card_view:contentPadding="10dp"
+    android:background="#fffafafa"
     android:layout_margin="13dp">
 
     <RelativeLayout
@@ -15,11 +16,9 @@
         <TextView
             android:id="@+id/device_select_separator_text"
             android:layout_width="match_parent"
-            android:layout_height="20dp"
-            android:background="@android:color/holo_red_dark"
-            android:text="contact det"
+            android:layout_height="wrap_content"
+            android:text="Seperator Text"
             android:gravity="center_vertical"
-            android:textColor="@android:color/white"
             android:textSize="14dp"/>
 
     </RelativeLayout>

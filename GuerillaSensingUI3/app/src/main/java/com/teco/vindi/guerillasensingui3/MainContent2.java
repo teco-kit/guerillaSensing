@@ -7,9 +7,12 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +38,7 @@ public class MainContent2 extends Fragment {
 
     // List of available device types.
     // TODO: Fetch from server by XML.
-    private List mDeviceTypes;
+    private List<DeviceType> mDeviceTypes;
 
 
     // TODO: Change this mess to subclasses!
@@ -121,21 +124,22 @@ public class MainContent2 extends Fragment {
         // TODO: XML files should be downloaded from server.
         // TODO: Device images should also be downloaded, maybe from a public image hoster.
 
-        DeviceType header = new DeviceType(R.drawable.ic_map, "Device Types","Select one please.");
-        DeviceType c0 = new DeviceType("bla");
-        DeviceType c1 = new DeviceType("bPart", "1.3", "19.07.2014", R.drawable.ic_bluetooth);
-        DeviceType c2 = new DeviceType("bPart", "2.0", "26.03.2015", R.drawable.ic_login);
-        DeviceType c3 = new DeviceType("TI SensorTag", "1.0", "12.12.2014", R.drawable.ic_config);
-        mDeviceTypes = new ArrayList();
+        DeviceType header = new DeviceType(R.drawable.ic_add, "Select Device Type","What kind of device do you want to add?");
+
+        DeviceType c1 = new DeviceType("bPart", "1.3", "19.07.2014", R.drawable.bpart);
+        DeviceType c2 = new DeviceType("bPart", "2.0", "26.03.2015", R.drawable.bpart);
+        DeviceType c3 = new DeviceType("TI SensorTag", "1.0", "12.12.2014", R.drawable.sensor_tag);
+        DeviceType c0 = new DeviceType("Your device type is not in the list? Please contact example@teco.kit.edu to have it added.");
+        mDeviceTypes = new ArrayList<>();
 
 
-         mDeviceTypes.add(header);
-         mDeviceTypes.add(c0);
-         mDeviceTypes.add(c1);
-         mDeviceTypes.add(c2);
-         mDeviceTypes.add(c3);
+        mDeviceTypes.add(header);
+        mDeviceTypes.add(c1);
+        mDeviceTypes.add(c2);
+        mDeviceTypes.add(c3);
+        mDeviceTypes.add(c0);
 
-        
+
 
         // Create adapter.
         mDeviceTypeAdapter = new MenuCardAdapter(mDeviceTypes);
@@ -148,6 +152,43 @@ public class MainContent2 extends Fragment {
 
         // Set recycler view adapter.
         mDeviceTypeRecycler.setAdapter(mDeviceTypeAdapter);
+
+
+        final GestureDetector mGestureDetector = new GestureDetector(getActivity(), new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onSingleTapUp(MotionEvent e) {
+                return true;
+            }
+        });
+
+        mDeviceTypeRecycler.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
+            @Override
+            public boolean onInterceptTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
+                View child = recyclerView.findChildViewUnder(motionEvent.getX(), motionEvent.getY());
+
+                if (child != null && mGestureDetector.onTouchEvent(motionEvent)) {
+                    int childID = recyclerView.getChildPosition(child);
+
+                    if (mDeviceTypes.get(childID).getType() == TYPE_ITEM) {
+
+                        Toast.makeText(getActivity(), "Adding device of type \"" + mDeviceTypes.get(childID).mName + "\".", Toast.LENGTH_SHORT).show();
+                    }
+
+                    return true;
+
+                }
+
+                return false;
+            }
+
+            @Override
+            public void onTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
+
+            }
+        });
+
+
+
 
         // Return inflated layout for this fragment.
         return rootView;
