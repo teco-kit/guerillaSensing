@@ -1,10 +1,8 @@
 package com.teco.vindi.guerillasensingui3;
 
 
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.GestureDetector;
@@ -16,7 +14,6 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 /**
  * A simple {@link android.app.Fragment} subclass.
@@ -160,6 +157,8 @@ public class MainContent2 extends Fragment {
                 return true;
             }
         });
+
+        //mDeviceTypeRecycler.addItemDecoration(new SimpleLineDecoration(getActivity()));
 
         mDeviceTypeRecycler.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
             @Override
