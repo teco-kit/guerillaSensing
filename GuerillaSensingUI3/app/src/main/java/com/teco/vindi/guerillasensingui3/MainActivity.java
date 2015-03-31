@@ -29,7 +29,6 @@ public class MainActivity extends ActionBarActivity {
     // Class name for the debug log.
     private static String TAG = "MainActivity";
 
-
     // The support app bar.
     private Toolbar mToolBar;
 

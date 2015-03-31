@@ -1,6 +1,7 @@
 package com.teco.vindi.guerillasensingui3;
 
 
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -10,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -18,75 +20,87 @@ import java.util.Vector;
  */
 public class MainContent2 extends Fragment {
 
+    // Fragment name, needed to display view pager tab.
     private static String FRAGMENT_NAME = "Graph";
 
-    public class ContactInfo {
-        protected String name;
-        protected String surname;
-        protected String email;
-        protected static final String NAME_PREFIX = "Name_";
-        protected static final String SURNAME_PREFIX = "Surname_";
-        protected static final String EMAIL_PREFIX = "email_";
+    // Recycler view for the device type list.
+    private RecyclerView mDeviceTypeRecycler;
 
-        public ContactInfo(String name, String surname, String email) {
-            this.name = name;
-            this.surname = surname;
-            this.email = email;
+    // Adapter for the device type recycler.
+    private MenuCardAdapter mDeviceTypeAdapter;
+
+    // List of available device types.
+    // TODO: Fetch from server by XML.
+    private List mDeviceTypes;
+
+
+    /**
+     * Device types.
+     * TODO: Put in its own class with full info (sensors).
+     */
+    public class DeviceType {
+        protected String mName;
+        protected String mVersion;
+        protected String mCreationDate;
+        protected int mPicture;
+
+        public DeviceType(String name, String version, String creationDate, int picture) {
+            this.mName = name;
+            this.mVersion = version;
+            this.mCreationDate = creationDate;
+            this.mPicture = picture;
 
         }
     }
 
 
+    /**
+     * Required empty public constructor for the fragment.
+     */
     public MainContent2() {
-        // Required empty public constructor
+        //Nothing.
     }
 
-
-    private MenuCardAdapter mMenuCardAdapter;
-    private RecyclerView mCardRecycler;
-
+    // Called when fragment is instantiated. Inflate interface.
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
+        // Inflate fragment.
         View rootView = inflater.inflate(R.layout.fragment_main_content2, container, false);
 
-        ContactInfo c1 = new ContactInfo("Vincent", "Diener", "vincent.diener@gmail.com");
-        ContactInfo c2 = new ContactInfo("Vincent", "Diener", "vincent.diener@gmail.com");
-        ContactInfo c3 = new ContactInfo("Vincent", "Diener", "vincent.diener@gmail.com");
-        ContactInfo c4 = new ContactInfo("Vincent", "Diener", "vincent.diener@gmail.com");
-        ContactInfo c5 = new ContactInfo("Vincent", "Diener", "vincent.diener@gmail.com");
-        ContactInfo c6 = new ContactInfo("Vincent", "Diener", "vincent.diener@gmail.com");
-        ContactInfo c7 = new ContactInfo("Vincent", "Diener", "vincent.diener@gmail.com");
-        ContactInfo c8 = new ContactInfo("Vincent", "Diener", "vincent.diener@gmail.com");
-        ContactInfo c9 = new ContactInfo("Vincent", "Diener", "vincent.diener@gmail.com");
-        ContactInfo c10 = new ContactInfo("Vincent", "Diener", "vincent.diener@gmail.com");
+        // Load device types from XML.
+        // TODO: This has to be read out of XML files.
+        // TODO: XML files should be downloaded from server.
+        // TODO: Device images should also be downloaded, maybe from a public image hoster.
+        DeviceType c1 = new DeviceType("bPart", "1.3", "19.07.2014", R.drawable.ic_bluetooth);
+        DeviceType c2 = new DeviceType("bPart", "2.0", "26.03.2015", R.drawable.ic_login);
+        DeviceType c3 = new DeviceType("TI SensorTag", "1.0", "12.12.2014", R.drawable.ic_config);
+        mDeviceTypes = new ArrayList();
 
-        List mMenuItems = new Vector<ContactInfo>();
-        mMenuItems.add(c1);
-        mMenuItems.add(c2);
-        mMenuItems.add(c3);
-        mMenuItems.add(c4);
-        mMenuItems.add(c5);
-        mMenuItems.add(c6);
-        mMenuItems.add(c7);
-        mMenuItems.add(c8);
-        mMenuItems.add(c9);
-        mMenuItems.add(c10);
+        mDeviceTypes.add(c1);
+        mDeviceTypes.add(c2);
+        mDeviceTypes.add(c3);
 
-        mMenuCardAdapter = new MenuCardAdapter(mMenuItems);
-        mCardRecycler = (RecyclerView) rootView.findViewById(R.id.main_card_view);
-        // Set the adapter for the list view
-        FragmentActivity c = getActivity();
-        LinearLayoutManager llm = new LinearLayoutManager(c);
-        llm.setOrientation(LinearLayoutManager.VERTICAL);
-        mCardRecycler.setLayoutManager(llm);
-        mCardRecycler.setAdapter(mMenuCardAdapter);
+        // Create adapter.
+        mDeviceTypeAdapter = new MenuCardAdapter(mDeviceTypes);
 
+        // Set recycler view to vertical.
+        mDeviceTypeRecycler = (RecyclerView) rootView.findViewById(R.id.main_card_view);
+        LinearLayoutManager llm = new LinearLayoutManager(getActivity());
+        llm.setOrientation(LinearLayoutManager.HORIZONTAL);
+        mDeviceTypeRecycler.setLayoutManager(llm);
 
-        // Inflate the layout for this fragment
+        // Set recycler view adapter.
+        mDeviceTypeRecycler.setAdapter(mDeviceTypeAdapter);
+
+        // Return inflated layout for this fragment.
         return rootView;
     }
 
+    /**
+     * Returns the name of this fragment so it can be displayed as view pager tab.
+     *
+     * @return The name of this fragment.
+     */
     @Override
     public String toString() {
         return FRAGMENT_NAME;
