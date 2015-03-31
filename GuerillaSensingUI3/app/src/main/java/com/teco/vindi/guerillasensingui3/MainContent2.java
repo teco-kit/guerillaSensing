@@ -20,6 +20,10 @@ import java.util.Vector;
  */
 public class MainContent2 extends Fragment {
 
+    private static final int TYPE_HEADER = 0;
+    private static final int TYPE_ITEM = 1;
+    private static final int TYPE_SEPARATOR = 2;
+
     // Fragment name, needed to display view pager tab.
     private static String FRAGMENT_NAME = "Graph";
 
@@ -34,22 +38,67 @@ public class MainContent2 extends Fragment {
     private List mDeviceTypes;
 
 
+    // TODO: Change this mess to subclasses!
     /**
-     * Device types.
-     * TODO: Put in its own class with full info (sensors).
+     * Device types, including header and separators in the list.
      */
     public class DeviceType {
+        // The data type (header, item or separator).
+        private int TYPE;
+
+        // For the "headers".
+        protected int mHeaderImage;
+        protected String mHeadLine;
+        protected String mSubLine;
+
+        // For the "items".
+        protected int mPicture;
         protected String mName;
         protected String mVersion;
         protected String mCreationDate;
-        protected int mPicture;
 
+        // For the "separators".
+        protected String mSeparator;
+
+        /**
+         * Constructor for the header.
+         * @param headerImage The header image.
+         * @param headLine The header head line.
+         * @param subLine The header sub line.
+         */
+        public DeviceType(int headerImage, String headLine, String subLine) {
+            this.TYPE = TYPE_HEADER;
+            this.mHeaderImage = headerImage;
+            this.mHeadLine = headLine;
+            this.mSubLine = subLine;
+        }
+
+        /**
+         * Constructor for device type.
+         * @param name The device name.
+         * @param version The device version.
+         * @param creationDate The device creation date.
+         * @param picture Reference to Drawable image of device.
+         */
         public DeviceType(String name, String version, String creationDate, int picture) {
+            this.TYPE = TYPE_ITEM;
+            this.mPicture = picture;
             this.mName = name;
             this.mVersion = version;
             this.mCreationDate = creationDate;
-            this.mPicture = picture;
+        }
 
+        /**
+         * Constructor for the separator.
+         * @param separator
+         */
+        public DeviceType(String separator) {
+            this.TYPE = TYPE_SEPARATOR;
+            this.mSeparator = separator;
+        }
+
+        public int getType() {
+            return TYPE;
         }
     }
 
@@ -71,14 +120,22 @@ public class MainContent2 extends Fragment {
         // TODO: This has to be read out of XML files.
         // TODO: XML files should be downloaded from server.
         // TODO: Device images should also be downloaded, maybe from a public image hoster.
+
+        DeviceType header = new DeviceType(R.drawable.ic_map, "Device Types","Select one please.");
+        DeviceType c0 = new DeviceType("bla");
         DeviceType c1 = new DeviceType("bPart", "1.3", "19.07.2014", R.drawable.ic_bluetooth);
         DeviceType c2 = new DeviceType("bPart", "2.0", "26.03.2015", R.drawable.ic_login);
         DeviceType c3 = new DeviceType("TI SensorTag", "1.0", "12.12.2014", R.drawable.ic_config);
         mDeviceTypes = new ArrayList();
 
-        mDeviceTypes.add(c1);
-        mDeviceTypes.add(c2);
-        mDeviceTypes.add(c3);
+
+         mDeviceTypes.add(header);
+         mDeviceTypes.add(c0);
+         mDeviceTypes.add(c1);
+         mDeviceTypes.add(c2);
+         mDeviceTypes.add(c3);
+
+        
 
         // Create adapter.
         mDeviceTypeAdapter = new MenuCardAdapter(mDeviceTypes);
@@ -86,7 +143,7 @@ public class MainContent2 extends Fragment {
         // Set recycler view to vertical.
         mDeviceTypeRecycler = (RecyclerView) rootView.findViewById(R.id.main_card_view);
         LinearLayoutManager llm = new LinearLayoutManager(getActivity());
-        llm.setOrientation(LinearLayoutManager.HORIZONTAL);
+        llm.setOrientation(LinearLayoutManager.VERTICAL);
         mDeviceTypeRecycler.setLayoutManager(llm);
 
         // Set recycler view adapter.

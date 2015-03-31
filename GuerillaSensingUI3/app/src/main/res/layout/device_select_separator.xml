@@ -1,0 +1,26 @@
+<android.support.v7.widget.CardView
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/card_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    card_view:cardCornerRadius="4dp"
+    card_view:contentPadding="10dp"
+    android:layout_margin="13dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/device_select_separator_text"
+            android:layout_width="match_parent"
+            android:layout_height="20dp"
+            android:background="@android:color/holo_red_dark"
+            android:text="contact det"
+            android:gravity="center_vertical"
+            android:textColor="@android:color/white"
+            android:textSize="14dp"/>
+
+    </RelativeLayout>
+</android.support.v7.widget.CardView>
