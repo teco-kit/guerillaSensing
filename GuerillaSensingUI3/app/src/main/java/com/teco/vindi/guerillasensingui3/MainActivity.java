@@ -1,6 +1,7 @@
 package com.teco.vindi.guerillasensingui3;
 
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -125,8 +126,8 @@ public class MainActivity extends ActionBarActivity {
                     } else {
                         // Item was clicked.
                         View v = mSideMenuRecycler.getChildAt(childID);
-                        mSideMenuAdapter.removeAt(childID);
-                        //mDrawerLayout.closeDrawers();
+                        //mSideMenuAdapter.removeAt(childID);
+                        mDrawerLayout.closeDrawers();
                         Toast.makeText(MainActivity.this, "Opening \"" + TITLES[childID - 1] + "\"", Toast.LENGTH_SHORT).show();
                     }
                     return true;
@@ -166,9 +167,8 @@ public class MainActivity extends ActionBarActivity {
         mDrawerLayout.setDrawerListener(mDrawerToggle); // Drawer Listener set to the Drawer toggle
         mDrawerToggle.syncState();               // Finally we set the drawer toggle sync State
 
-
-
-
+        // Allow swipes to open the drawer.
+        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
 
 
 

@@ -1,6 +1,7 @@
 package com.teco.vindi.guerillasensingui3;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -171,6 +172,8 @@ public class MainContent2 extends Fragment {
                     if (mDeviceTypes.get(childID).getType() == TYPE_ITEM) {
 
                         Toast.makeText(getActivity(), "Adding device of type \"" + mDeviceTypes.get(childID).mName + "\".", Toast.LENGTH_SHORT).show();
+                        Intent startAc = new Intent(getActivity(), SelectPositionActivity.class);
+                        startActivity(startAc);
                     }
 
                     return true;
