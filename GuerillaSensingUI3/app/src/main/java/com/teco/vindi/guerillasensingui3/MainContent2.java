@@ -173,6 +173,7 @@ public class MainContent2 extends Fragment {
 
                         Toast.makeText(getActivity(), "Adding device of type \"" + mDeviceTypes.get(childID).mName + "\".", Toast.LENGTH_SHORT).show();
                         Intent startAc = new Intent(getActivity(), SelectPositionActivity.class);
+
                         startActivity(startAc);
                     }
 
