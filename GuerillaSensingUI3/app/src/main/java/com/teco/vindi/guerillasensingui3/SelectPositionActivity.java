@@ -114,10 +114,7 @@ public class SelectPositionActivity extends ActionBarActivity implements GoogleM
 
     private void addToHeatMap(LatLng ll) {
 
-        if (mOverlay != null) {
-            mOverlay.clearTileCache();
-            mOverlay.remove();
-        }
+
 
         if  (lll == null) {
             lll = new ArrayList<>();
@@ -125,7 +122,7 @@ public class SelectPositionActivity extends ActionBarActivity implements GoogleM
 
 
 
-        if (count < 10) {
+        if (count < 3) {
             intensity = 1.0f;
         } else {
             intensity = 0.5f;
@@ -137,11 +134,14 @@ public class SelectPositionActivity extends ActionBarActivity implements GoogleM
         lll.add(wll);
 
 
-        mProvider = new HeatmapTileProvider.Builder().weightedData(lll).build();
-        mProvider.setRadius(50);
-
-
-        mOverlay = mMap.addTileOverlay(new TileOverlayOptions().tileProvider(mProvider));
+        if (mOverlay == null) {
+            mProvider = new HeatmapTileProvider.Builder().weightedData(lll).build();
+            mProvider.setRadius(50);
+            mOverlay = mMap.addTileOverlay(new TileOverlayOptions().tileProvider(mProvider));
+        } else {
+            mProvider.setWeightedData(lll);
+            mOverlay.clearTileCache();
+        }
 
     }
 

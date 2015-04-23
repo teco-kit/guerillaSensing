@@ -32,6 +32,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedList;
 
 /**
  * Tile provider that creates heatmap tiles.
@@ -434,14 +435,12 @@ public class HeatmapTileProvider implements TileProvider {
 
         // Quantize points
         double[][] intensity = new double[TILE_DIM + mRadius * 2][TILE_DIM + mRadius * 2];
-        // double[][] count = new double[TILE_DIM + mRadius * 2][TILE_DIM + mRadius * 2];
 
         for (WeightedLatLng w : points) {
             Point p = w.getPoint();
             int bucketX = (int) ((p.x - minX) / bucketWidth);
             int bucketY = (int) ((p.y - minY) / bucketWidth);
             intensity[bucketX][bucketY] += w.getIntensity();
-            // count[bucketX][bucketY] += 1;
         }
         // Quantize wraparound points (taking xOffset into account)
         for (WeightedLatLng w : wrappedPoints) {
@@ -449,18 +448,9 @@ public class HeatmapTileProvider implements TileProvider {
             int bucketX = (int) ((p.x + xOffset - minX) / bucketWidth);
             int bucketY = (int) ((p.y - minY) / bucketWidth);
             intensity[bucketX][bucketY] += w.getIntensity();
-            // count[bucketX][bucketY] += 1;
         }
 
-        for (int i=0; i<TILE_DIM + mRadius * 2; i++) {
-            for (int j=0; j<TILE_DIM + mRadius * 2; j++) {
-                // if (count[i][j] > 0) {
-                    // Log.d("calc", "Dividing " + intensity[i][j] + " by " + count[i][j] + ".");
-                    // intensity[i][j] /= count[i][j];
-                // }
 
-            }
-        }
         // Convolve it ("smoothen" it out)
         Object[] valuesAndWeights =  convolve(intensity, mKernel);
         double[][] convolved = (double[][]) valuesAndWeights[0];
@@ -622,8 +612,12 @@ public class HeatmapTileProvider implements TileProvider {
         int upperLimit = radius + dim - 1;
 
         // Convolve horizontally
+
         double[][] intermediate = new double[dimOld][dimOld];
         double[][] additionsX = new double[dimOld][dimOld];
+
+        LinkedList<Float>[][] weightsPerPoint = new LinkedList[dimOld][dimOld];
+        LinkedList<Float>[][] intensitiesPerPoint = new LinkedList[dimOld][dimOld];
 
         // Need to convolve every point (including those outside of non-padded area)
         // but only need to add to points within non-padded area
@@ -648,8 +642,18 @@ public class HeatmapTileProvider implements TileProvider {
                         double myWeight = kernel[x2 - (x - radius)];
                         double d = myWeight / (myWeight + currentWeightOfPoint);
                         double nd = 1 - d;
-                        intermediate[x2][y] = intermediate[x2][y] * nd + val * d * kernel[x2 - (x - radius)];
+                        intermediate[x2][y] = intermediate[x2][y]+ val * kernel[x2 - (x - radius)];
                         additionsX[x2][y] += myWeight;
+
+
+                        if (weightsPerPoint[x2][y] == null) {
+                            weightsPerPoint[x2][y] = new LinkedList<Float>();
+                            intensitiesPerPoint[x2][y] = new LinkedList<Float>();
+                        }
+
+                        weightsPerPoint[x2][y].add((float) myWeight);
+                        intensitiesPerPoint[x2][y].add((float) val);
+
                     }
                 }
             }
@@ -658,6 +662,13 @@ public class HeatmapTileProvider implements TileProvider {
         // Convolve vertically
         double[][] outputGrid = new double[dim][dim];
         double[][] additionsY = new double[dim][dim];
+
+
+
+        LinkedList<Float>[][] weightsPerPoint2 = new LinkedList[dim][dim];
+        LinkedList<Float>[][] intensitiesPerPoint2 = new LinkedList[dim][dim];
+
+
 
         // Similarly, need to convolve every point, but only add to points within non-padded area
         // However, we are adding to a smaller grid here (previously, was to a grid of same size)
@@ -690,12 +701,42 @@ public class HeatmapTileProvider implements TileProvider {
                         double myWeight = kernel[y2 - (y - radius)] * weight;
                         double d = myWeight / (myWeight + currentWeightOfPoint);
                         double nd = 1 - d;
-                        outputGrid[x - radius][y2 - radius] = outputGrid[x - radius][y2 - radius] * nd + val * d * kernel[y2 - (y - radius)];
+                        outputGrid[x - radius][y2 - radius] = outputGrid[x - radius][y2 - radius] + val * kernel[y2 - (y - radius)];
                         additionsY[x - radius][y2 - radius] += myWeight;
+
+
+
+
+                        if (weightsPerPoint2[x - radius][y2 - radius] == null) {
+                            weightsPerPoint2[x - radius][y2 - radius] = new LinkedList<Float>();
+                            intensitiesPerPoint2[x - radius][y2 - radius] = new LinkedList<Float>();
+                        }
+
+                        weightsPerPoint2[x - radius][y2 - radius].add((float) myWeight);
+                        intensitiesPerPoint2[x - radius][y2 - radius].add((float) val);
                     }
                 }
             }
         }
+
+        for (x = 0; x < dim; x++) {
+            for (y = 0; y < dim; y++) {
+                outputGrid[x][y] /= additionsY[x][y];
+
+                if (weightsPerPoint2[x][y] != null) {
+                    int i = 0;
+                    float finalValue;
+                    for (Float weightOfPoint : weightsPerPoint2[x][y]) {
+                        Float ValueOfPoint = intensitiesPerPoint2[x][y].get(i);
+
+                        i++;
+                    }
+
+                   // outputGrid[x][y] = 0;
+                }
+            }
+        }
+
         return new Object[]{outputGrid, additionsY};
     }
 
@@ -728,6 +769,8 @@ public class HeatmapTileProvider implements TileProvider {
                 val = grid[j][i];
                 alpha = weights[j][i];
 
+               // val = alpha;
+
                 index = i * dim + j;
                 col = (int) (val * colorMapScaling);
 
@@ -739,8 +782,8 @@ public class HeatmapTileProvider implements TileProvider {
                 } else {
                     colors[index] = Color.TRANSPARENT;
                 }
-
-                //colors[index] = adjustAlpha(colors[index], alpha);
+               // colors[index] = Color.RED;
+                colors[index] = adjustAlpha(colors[index], alpha);
             }
         }
 
