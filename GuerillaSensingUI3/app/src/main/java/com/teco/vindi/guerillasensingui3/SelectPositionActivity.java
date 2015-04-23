@@ -26,6 +26,7 @@ import com.teco.vindi.guerillasensingui3.google.WeightedLatLng;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 
 public class SelectPositionActivity extends ActionBarActivity implements GoogleMap.OnMapClickListener, GoogleMap.OnCameraChangeListener {
@@ -108,8 +109,8 @@ public class SelectPositionActivity extends ActionBarActivity implements GoogleM
 
     private List<WeightedLatLng>lll;
     private HeatmapTileProvider mProvider;
-    TileOverlay mOverlay;
-    private float intensity;
+    private TileOverlay mOverlay;
+    private double intensity;
     private float count = 0;
 
     private void addToHeatMap(LatLng ll) {
@@ -121,17 +122,19 @@ public class SelectPositionActivity extends ActionBarActivity implements GoogleM
         }
 
 
-
-        if (count < 3) {
-            intensity = 1.0f;
-        } else {
-            intensity = 0.5f;
-        }
         count++;
 
+        Random r = new Random();
+        double xA, yA;
 
-        WeightedLatLng wll = new WeightedLatLng(ll, intensity);
-        lll.add(wll);
+        for (int i = 0; i < 100000; i++) {
+            xA = r.nextDouble() - 0.5;
+            yA = r.nextDouble() - 0.5;
+            intensity = r.nextDouble();
+
+            WeightedLatLng wll = new WeightedLatLng(new LatLng(ll.latitude + xA, ll.longitude + yA), intensity);
+            lll.add(wll);
+        }
 
 
         if (mOverlay == null) {

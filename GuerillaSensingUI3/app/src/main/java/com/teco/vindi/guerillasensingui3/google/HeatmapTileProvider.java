@@ -147,7 +147,7 @@ public class HeatmapTileProvider implements TileProvider {
     /**
      * Kernel to use for convolution
      */
-    private double[] mKernel;
+    private float[] mKernel;
 
     /**
      * Opacity of the overall heatmap overlay [0...1]
@@ -434,27 +434,30 @@ public class HeatmapTileProvider implements TileProvider {
         }
 
         // Quantize points
-        double[][] intensity = new double[TILE_DIM + mRadius * 2][TILE_DIM + mRadius * 2];
+        float[][] intensity = new float[TILE_DIM + mRadius * 2][TILE_DIM + mRadius * 2];
+        int[][] pointCount = new int[TILE_DIM + mRadius * 2][TILE_DIM + mRadius * 2];
 
         for (WeightedLatLng w : points) {
             Point p = w.getPoint();
             int bucketX = (int) ((p.x - minX) / bucketWidth);
             int bucketY = (int) ((p.y - minY) / bucketWidth);
             intensity[bucketX][bucketY] += w.getIntensity();
+            pointCount[bucketX][bucketY] += 1;
         }
+
         // Quantize wraparound points (taking xOffset into account)
         for (WeightedLatLng w : wrappedPoints) {
             Point p = w.getPoint();
             int bucketX = (int) ((p.x + xOffset - minX) / bucketWidth);
             int bucketY = (int) ((p.y - minY) / bucketWidth);
             intensity[bucketX][bucketY] += w.getIntensity();
+            pointCount[bucketX][bucketY] += 1;
         }
 
-
         // Convolve it ("smoothen" it out)
-        Object[] valuesAndWeights =  convolve(intensity, mKernel);
-        double[][] convolved = (double[][]) valuesAndWeights[0];
-        double[][] weights = (double[][]) valuesAndWeights[1];
+        Object[] valuesAndWeights =  convolve(intensity, pointCount, mKernel);
+        float[][] convolved = (float[][]) valuesAndWeights[0];
+        float[][] weights = (float[][]) valuesAndWeights[1];
 
         // Color it into a bitmap
         Bitmap bitmap = colorize(convolved, weights, mColorMap, mMaxIntensity[zoom]);
@@ -583,13 +586,14 @@ public class HeatmapTileProvider implements TileProvider {
      * @param sd     standard deviation of the Gaussian function
      * @return generated Gaussian kernel
      */
-    static double[] generateKernel(int radius, double sd) {
-        double[] kernel = new double[radius * 2 + 1];
+    static float[] generateKernel(int radius, double sd) {
+        float[] kernel = new float[radius * 2 + 1];
         for (int i = -radius; i <= radius; i++) {
-            kernel[i + radius] = (Math.exp(-i * i / (2 * sd * sd)));
+            kernel[i + radius] = (float) (Math.exp(-i * i / (2 * sd * sd)));
         }
         return kernel;
     }
+
 
     /**
      * Applies a 2D Gaussian convolution to the input grid, returning a 2D grid cropped of padding.
@@ -599,7 +603,7 @@ public class HeatmapTileProvider implements TileProvider {
      * @param kernel Pre-computed Gaussian kernel of size radius * 2 + 1
      * @return the smoothened grid
      */
-    static Object[] convolve(double[][] grid, double[] kernel) {
+    static Object[] convolve(float[][] grid, int[][] count, float[] kernel) {
         // Calculate radius size
         int radius = (int) Math.floor((double) kernel.length / 2.0);
         // Padded dimension
@@ -611,24 +615,27 @@ public class HeatmapTileProvider implements TileProvider {
         int lowerLimit = radius;
         int upperLimit = radius + dim - 1;
 
+        // Create arrays.
+
+        float[][] intermediate = new float[dimOld][dimOld];
+        float[][] additionsX = new float[dimOld][dimOld];
+
+        float[][] outputGrid = new float[dim][dim];
+        float[][] additionsY = new float[dim][dim];
+
         // Convolve horizontally
-
-        double[][] intermediate = new double[dimOld][dimOld];
-        double[][] additionsX = new double[dimOld][dimOld];
-
-        LinkedList<Float>[][] weightsPerPoint = new LinkedList[dimOld][dimOld];
-        LinkedList<Float>[][] intensitiesPerPoint = new LinkedList[dimOld][dimOld];
 
         // Need to convolve every point (including those outside of non-padded area)
         // but only need to add to points within non-padded area
         int x, y, x2, xUpperLimit, initial;
-        double val;
+        float val;
         for (x = 0; x < dimOld; x++) {
             for (y = 0; y < dimOld; y++) {
                 // for each point (x, y)
                 val = grid[x][y];
                 // only bother if something there
                 if (val != 0) {
+                    val = grid[x][y] / count[x][y];
                     // need to "apply" convolution from that point to every point in
                     // (max(lowerLimit, x - radius), y) to (min(upperLimit, x + radius), y)
                     xUpperLimit = ((upperLimit < x + radius) ? upperLimit : x + radius) + 1;
@@ -638,21 +645,9 @@ public class HeatmapTileProvider implements TileProvider {
                         // multiplier for x2 = x - radius is kernel[0]
                         // x2 = x + radius is kernel[radius * 2]
                         // so multiplier for x2 in general is kernel[x2 - (x - radius)]
-                        double currentWeightOfPoint = additionsX[x2][y];
                         double myWeight = kernel[x2 - (x - radius)];
-                        double d = myWeight / (myWeight + currentWeightOfPoint);
-                        double nd = 1 - d;
                         intermediate[x2][y] = intermediate[x2][y]+ val * kernel[x2 - (x - radius)];
                         additionsX[x2][y] += myWeight;
-
-
-                        if (weightsPerPoint[x2][y] == null) {
-                            weightsPerPoint[x2][y] = new LinkedList<Float>();
-                            intensitiesPerPoint[x2][y] = new LinkedList<Float>();
-                        }
-
-                        weightsPerPoint[x2][y].add((float) myWeight);
-                        intensitiesPerPoint[x2][y].add((float) val);
 
                     }
                 }
@@ -660,15 +655,6 @@ public class HeatmapTileProvider implements TileProvider {
         }
 
         // Convolve vertically
-        double[][] outputGrid = new double[dim][dim];
-        double[][] additionsY = new double[dim][dim];
-
-
-
-        LinkedList<Float>[][] weightsPerPoint2 = new LinkedList[dim][dim];
-        LinkedList<Float>[][] intensitiesPerPoint2 = new LinkedList[dim][dim];
-
-
 
         // Similarly, need to convolve every point, but only add to points within non-padded area
         // However, we are adding to a smaller grid here (previously, was to a grid of same size)
@@ -699,21 +685,8 @@ public class HeatmapTileProvider implements TileProvider {
                         // TODO: Multiplying with VAL here is sort of cheating, but it gets rid of the overwriting problem.
                         // TODO: It would be better to implement interpolation using splines.
                         double myWeight = kernel[y2 - (y - radius)] * weight;
-                        double d = myWeight / (myWeight + currentWeightOfPoint);
-                        double nd = 1 - d;
                         outputGrid[x - radius][y2 - radius] = outputGrid[x - radius][y2 - radius] + val * kernel[y2 - (y - radius)];
                         additionsY[x - radius][y2 - radius] += myWeight;
-
-
-
-
-                        if (weightsPerPoint2[x - radius][y2 - radius] == null) {
-                            weightsPerPoint2[x - radius][y2 - radius] = new LinkedList<Float>();
-                            intensitiesPerPoint2[x - radius][y2 - radius] = new LinkedList<Float>();
-                        }
-
-                        weightsPerPoint2[x - radius][y2 - radius].add((float) myWeight);
-                        intensitiesPerPoint2[x - radius][y2 - radius].add((float) val);
                     }
                 }
             }
@@ -722,18 +695,6 @@ public class HeatmapTileProvider implements TileProvider {
         for (x = 0; x < dim; x++) {
             for (y = 0; y < dim; y++) {
                 outputGrid[x][y] /= additionsY[x][y];
-
-                if (weightsPerPoint2[x][y] != null) {
-                    int i = 0;
-                    float finalValue;
-                    for (Float weightOfPoint : weightsPerPoint2[x][y]) {
-                        Float ValueOfPoint = intensitiesPerPoint2[x][y].get(i);
-
-                        i++;
-                    }
-
-                   // outputGrid[x][y] = 0;
-                }
             }
         }
 
@@ -748,7 +709,7 @@ public class HeatmapTileProvider implements TileProvider {
      * @param max      Maximum intensity value: maps to 100% on gradient
      * @return the colorized grid in Bitmap form, with same dimensions as grid
      */
-    static Bitmap colorize(double[][] grid, double[][] weights, int[] colorMap, double max) {
+    static Bitmap colorize(float[][] grid, float[][] weights, int[] colorMap, double max) {
         // Maximum color value
         int maxColor = colorMap[colorMap.length - 1];
         // Multiplier to "scale" intensity values with, to map to appropriate color
@@ -815,10 +776,11 @@ public class HeatmapTileProvider implements TileProvider {
      * @param screenDim larger dimension of screen in pixels (for scale)
      * @return Approximate max value
      */
-    static double getMaxValue(Collection<WeightedLatLng> points, Bounds bounds, int radius,
-                              int screenDim) {
+    static double getMaxValue(Collection<WeightedLatLng> points, Bounds bounds, int radius, int screenDim) {
         // Approximate scale as if entire heatmap is on the screen
         // ie scale dimensions to larger of width or height (screenDim)
+
+        /*
         double minX = bounds.minX;
         double maxX = bounds.maxX;
         double minY = bounds.minY;
@@ -862,7 +824,8 @@ public class HeatmapTileProvider implements TileProvider {
 
             if (value > max) max = value;
         }
+        */
 
-        return max;
+        return 1.0;
     }
 }
