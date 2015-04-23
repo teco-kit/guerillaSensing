@@ -140,7 +140,7 @@ public class MainContent2 extends Fragment {
 
 
         // Create adapter.
-        mDeviceTypeAdapter = new MenuCardAdapter(mDeviceTypes);
+       // mDeviceTypeAdapter = new MenuCardAdapter(mDeviceTypes);
 
         // Set recycler view to vertical.
         mDeviceTypeRecycler = (RecyclerView) rootView.findViewById(R.id.main_card_view);

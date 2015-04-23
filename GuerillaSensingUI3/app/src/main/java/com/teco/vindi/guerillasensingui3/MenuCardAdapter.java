@@ -20,9 +20,9 @@ public class MenuCardAdapter extends RecyclerView.Adapter<MenuCardAdapter.ViewHo
     private static final int TYPE_ITEM = 1;
     private static final int TYPE_SEPARATOR = 2;
 
-    private List<MainContent2.DeviceType> mDeviceTypeList;
+    private List<StartMenuActivity.DeviceType> mDeviceTypeList;
 
-    public MenuCardAdapter(List<MainContent2.DeviceType> deviceTypeList) {
+    public MenuCardAdapter(List<StartMenuActivity.DeviceType> deviceTypeList) {
         this.mDeviceTypeList = deviceTypeList;
     }
 
@@ -43,7 +43,7 @@ public class MenuCardAdapter extends RecyclerView.Adapter<MenuCardAdapter.ViewHo
     // Depending on the type, different fields (references) are available.
     @Override
     public void onBindViewHolder(ViewHolder deviceTypeViewHolder, int position) {
-        MainContent2.DeviceType item = mDeviceTypeList.get(position);
+        StartMenuActivity.DeviceType item = mDeviceTypeList.get(position);
 
         switch (item.getType()) {
             case TYPE_HEADER:

@@ -47,6 +47,14 @@
             android:name=".SelectPositionActivity"
             android:label="@string/title_activity_select_position" >
         </activity>
+        <activity
+            android:name=".NavigationDrawerActivity"
+            android:label="@string/title_activity_navigation_drawer" >
+        </activity>
+        <activity
+            android:name=".SelectEnvBoardActivity"
+            android:label="@string/title_activity_select_env_board" >
+        </activity>
     </application>
 
 </manifest>

@@ -16,13 +16,7 @@
             android:id="@+id/tool_bar"
             layout="@layout/custom_toolbar" />
 
-        <!-- The remaining content below the tool bar .-->
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/main_menu_card_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="#ffececec"/>
-
+        <!-- The remaining content below the tool bar. -->
 
     </LinearLayout>
 

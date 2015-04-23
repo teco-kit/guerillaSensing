@@ -8,5 +8,8 @@
     <string name="hello_blank_fragment_2">Hello blank fragment2</string>
     <string name="title_activity_start_menu">StartMenuActivity</string>
     <string name="title_activity_select_position">SelectPositionActivity</string>
+    <string name="title_activity_navigation_draver">NavigationDraverActivity</string>
+    <string name="title_activity_navigation_drawer">NavigationDrawerActivity</string>
+    <string name="title_activity_select_env_board">SelectEnvBoardActivity</string>
 
 </resources>

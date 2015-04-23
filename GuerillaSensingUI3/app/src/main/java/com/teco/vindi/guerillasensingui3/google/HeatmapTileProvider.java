@@ -462,10 +462,12 @@ public class HeatmapTileProvider implements TileProvider {
             }
         }
         // Convolve it ("smoothen" it out)
-        double[][] convolved = convolve(intensity, mKernel);
+        Object[] valuesAndWeights =  convolve(intensity, mKernel);
+        double[][] convolved = (double[][]) valuesAndWeights[0];
+        double[][] weights = (double[][]) valuesAndWeights[1];
 
         // Color it into a bitmap
-        Bitmap bitmap = colorize(convolved, mColorMap, mMaxIntensity[zoom]);
+        Bitmap bitmap = colorize(convolved, weights, mColorMap, mMaxIntensity[zoom]);
 
         // Convert bitmap to tile and return
         return convertBitmap(bitmap);
@@ -607,7 +609,7 @@ public class HeatmapTileProvider implements TileProvider {
      * @param kernel Pre-computed Gaussian kernel of size radius * 2 + 1
      * @return the smoothened grid
      */
-    static double[][] convolve(double[][] grid, double[] kernel) {
+    static Object[] convolve(double[][] grid, double[] kernel) {
         // Calculate radius size
         int radius = (int) Math.floor((double) kernel.length / 2.0);
         // Padded dimension
@@ -661,11 +663,14 @@ public class HeatmapTileProvider implements TileProvider {
         // However, we are adding to a smaller grid here (previously, was to a grid of same size)
         int y2, yUpperLimit;
 
+        double weight;
+
         // Don't care about convolving parts in horizontal padding - wont impact inner
         for (x = lowerLimit; x < upperLimit + 1; x++) {
             for (y = 0; y < dimOld; y++) {
                 // for each point (x, y)
                 val = intermediate[x][y];
+                weight = additionsX[x][y];
                 // only bother if something there
                 if (val != 0) {
                     // need to "apply" convolution from that point to every point in
@@ -682,7 +687,7 @@ public class HeatmapTileProvider implements TileProvider {
 
                         // TODO: Multiplying with VAL here is sort of cheating, but it gets rid of the overwriting problem.
                         // TODO: It would be better to implement interpolation using splines.
-                        double myWeight = kernel[y2 - (y - radius)] * val;
+                        double myWeight = kernel[y2 - (y - radius)] * weight;
                         double d = myWeight / (myWeight + currentWeightOfPoint);
                         double nd = 1 - d;
                         outputGrid[x - radius][y2 - radius] = outputGrid[x - radius][y2 - radius] * nd + val * d * kernel[y2 - (y - radius)];
@@ -691,8 +696,7 @@ public class HeatmapTileProvider implements TileProvider {
                 }
             }
         }
-
-        return outputGrid;
+        return new Object[]{outputGrid, additionsY};
     }
 
     /**
@@ -703,7 +707,7 @@ public class HeatmapTileProvider implements TileProvider {
      * @param max      Maximum intensity value: maps to 100% on gradient
      * @return the colorized grid in Bitmap form, with same dimensions as grid
      */
-    static Bitmap colorize(double[][] grid, int[] colorMap, double max) {
+    static Bitmap colorize(double[][] grid, double[][] weights, int[] colorMap, double max) {
         // Maximum color value
         int maxColor = colorMap[colorMap.length - 1];
         // Multiplier to "scale" intensity values with, to map to appropriate color
@@ -712,17 +716,21 @@ public class HeatmapTileProvider implements TileProvider {
         int dim = grid.length;
 
         int i, j, index, col;
-        double val;
+        double val, alpha;
         // Array of colors
         int colors[] = new int[dim * dim];
         for (i = 0; i < dim; i++) {
             for (j = 0; j < dim; j++) {
+
                 // [x][y]
                 // need to enter each row of x coordinates sequentially (x first)
                 // -> [j][i]
                 val = grid[j][i];
+                alpha = weights[j][i];
+
                 index = i * dim + j;
                 col = (int) (val * colorMapScaling);
+
 
                 if (val != 0) {
                     // Make it more resilient: cant go outside colorMap
@@ -731,6 +739,8 @@ public class HeatmapTileProvider implements TileProvider {
                 } else {
                     colors[index] = Color.TRANSPARENT;
                 }
+
+                //colors[index] = adjustAlpha(colors[index], alpha);
             }
         }
 
@@ -739,6 +749,18 @@ public class HeatmapTileProvider implements TileProvider {
         // (int[] pixels, int offset, int stride, int x, int y, int width, int height)
         tile.setPixels(colors, 0, dim, 0, 0, dim, dim);
         return tile;
+    }
+
+    static int adjustAlpha(int color, double factor) {
+        int alpha = Math.round(255 * ((float)factor));
+
+        if (alpha >= 255)
+            alpha = 255;
+
+        int red = Color.red(color);
+        int green = Color.green(color);
+        int blue = Color.blue(color);
+        return Color.argb(alpha, red, green, blue);
     }
 
     /**
