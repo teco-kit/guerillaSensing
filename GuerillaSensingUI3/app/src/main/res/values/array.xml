@@ -1,23 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array
-        name="plants_array">
-        <item>text_string1</item>
-        <item>text_string2</item>
-        <item>text_string3</item>
-        <item>text_string4</item>
-        <item>text_string5</item>
-        <item>text_string6</item>
-        <item>text_string7</item>
-        <item>text_string8</item>
-        <item>text_string9</item>
-        <item>text_string10</item>
-        <item>text_string11</item>
-        <item>text_string12</item>
-        <item>text_string13</item>
-        <item>text_string14</item>
-        <item>text_string15</item>
-        <item>text_string16</item>
+        name="array_metrics_string">
+        <item>Air quality</item>
+        <item>Temperature</item>
+        <item>CO</item>
+        <item>CO2</item>
+        <item>O3</item>
+        <item>NO2</item>
+        <item>Fine dust</item>
+        <item>UV</item>
+        <item>Humidity</item>
+    </string-array>
+    <string-array
+        name="array_metrics_value">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
     </string-array>
 </resources>
 

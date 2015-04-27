@@ -14,7 +14,7 @@
             android:id="@+id/tool_bar"
             layout="@layout/custom_toolbar" />
 
-        <com.teco.vindi.guerillasensingui3.SlidingTabLayout
+        <edu.teco.guerillaSensing.SlidingTabLayout
             android:id="@+id/content_tabs"
             android:background="@color/top_bars_base"
             android:layout_width="match_parent"

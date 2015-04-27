@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="General">
+        <CheckBoxPreference
+            android:key="pref_use_gps"
+            android:title="Enable GPS"
+            android:summary="Allow the map to locate you"
+            android:defaultValue="true"/>
+        <CheckBoxPreference
+            android:key="pref_show_scale"
+            android:title="Show scale"
+            android:summary="Show a scale on the side of the map"
+            android:defaultValue="true"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Heatmap">
+        <CheckBoxPreference
+            android:key="pref_show_heatmap"
+            android:summary="Overlay the map with a heatmap"
+            android:title="Show heatmap"
+            android:defaultValue="true"/>
+
+        <ListPreference
+            android:key="pref_select_metric"
+            android:dependency="pref_show_heatmap"
+            android:title="Select metric"
+            android:summary="Select the metric to show on the heatmap"
+            android:dialogTitle="Select metric"
+            android:entries="@array/array_metrics_string"
+            android:entryValues="@array/array_metrics_value" />
+
+        <Preference
+            android:summary="Get help online"
+            android:title="Open help">
+            <intent android:action="android.intent.action.VIEW"
+                android:data="http://teco.edu/" />
+        </Preference>
+
+    </PreferenceCategory>
+
+
+</PreferenceScreen>

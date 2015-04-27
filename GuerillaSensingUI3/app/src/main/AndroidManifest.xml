@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.teco.vindi.guerillasensingui3" >
+    package="edu.teco.guerillaSensing" >
 
     <permission
-        android:name="com.teco.vindi.guerillasensingui3.permission.MAPS_RECEIVE"
+        android:name="edu.teco.guerillaSensing.permission.MAPS_RECEIVE"
         android:protectionLevel="signature" />
 
     <uses-permission android:name="com.teco.vindi.guerillasensingui3.permission.MAPS_RECEIVE" />
@@ -13,6 +13,8 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
 
     <uses-feature
         android:glEsVersion="0x00020000"
@@ -25,17 +27,17 @@
         android:theme="@style/AppTheme" >
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
-            android:value="AIzaSyCcOrXWRcJP994KEk_UhxcWJ1IhpKOCAbU" />
+            android:value="AIzaSyCnPmKMUBSbW-dggMRhvzSSfMSf8aRvlY0" />
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
         <activity
-            android:name=".MainActivity"
+            android:name="edu.teco.guerillaSensing.MainActivity"
             android:label="@string/app_name" >
         </activity>
         <activity
-            android:name=".StartMenuActivity"
+            android:name="edu.teco.guerillaSensing.StartMenuActivity"
             android:label="@string/title_activity_start_menu" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -44,17 +46,22 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".SelectPositionActivity"
+            android:name="edu.teco.guerillaSensing.SelectPositionActivity"
             android:label="@string/title_activity_select_position" >
         </activity>
         <activity
-            android:name=".NavigationDrawerActivity"
+            android:name="edu.teco.guerillaSensing.NavigationDrawerActivity"
             android:label="@string/title_activity_navigation_drawer" >
         </activity>
         <activity
-            android:name=".SelectEnvBoardActivity"
+            android:name="edu.teco.guerillaSensing.SelectEnvBoardActivity"
             android:label="@string/title_activity_select_env_board" >
         </activity>
+        <activity
+            android:name="edu.teco.guerillaSensing.SelectMetricActivity"
+            android:label="@string/title_activity_select_metric" >
+        </activity>
+        <service android:name="edu.teco.envboardservicelib.EnvBoardService"/>
     </application>
 
 </manifest>

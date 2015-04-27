@@ -1,0 +1,32 @@
+<android.support.v4.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- The main content view, has to be the first child of drawer layout. -->
+    <LinearLayout
+        android:id="@+id/content_frame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- The tool bar. -->
+        <include
+            android:id="@+id/tool_bar"
+            layout="@layout/custom_toolbar" />
+
+        <!-- The remaining content below the tool bar .-->
+        <fragment
+            android:id="@+id/map_select_pos"
+            class="edu.teco.guerillaSensing.SelectMetricActivity$SelectMetricFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+
+    </LinearLayout>
+
+    <!-- The navigation drawer, has to be the second child of drawer layout. -->
+    <include layout="@layout/navigation_drawer"/>
+
+</android.support.v4.widget.DrawerLayout>
