@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <string-array
         name="array_metrics_string">
         <item>Air quality</item>
@@ -12,17 +13,52 @@
         <item>UV</item>
         <item>Humidity</item>
     </string-array>
+
     <string-array
         name="array_metrics_value">
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-        <item>6</item>
-        <item>7</item>
-        <item>8</item>
+        <item>air</item>
+        <item>temp</item>
+        <item>co</item>
+        <item>co2</item>
+        <item>o3</item>
+        <item>no2</item>
+        <item>dust</item>
+        <item>uv</item>
+        <item>hum</item>
+    </string-array>
+
+    <array
+        name="array_metrics_icon">
+        <item>@drawable/ic_add</item>
+        <item>@drawable/ic_add</item>
+        <item>@drawable/ic_add</item>
+        <item>@drawable/ic_add</item>
+        <item>@drawable/ic_add</item>
+        <item>@drawable/ic_add</item>
+        <item>@drawable/ic_add</item>
+        <item>@drawable/ic_add</item>
+        <item>@drawable/ic_add</item>
+    </array>
+
+    <string-array name="scale_labels">
+        <item>-5 °C</item>
+        <item>50 °C</item>
+        <item>0 lx</item>
+        <item>100000 lx</item>
+        <item>0%</item>
+        <item>100%</item>
+        <item>-5 °C</item>
+        <item>50 °C</item>
+        <item>0 lx</item>
+        <item>100000 lx</item>
+        <item>0%</item>
+        <item>100%</item>
+        <item>-5 °C</item>
+        <item>50 °C</item>
+        <item>0 lx</item>
+        <item>100000 lx</item>
+        <item>0%</item>
+        <item>100%</item>
     </string-array>
 </resources>
 

@@ -1,4 +1,4 @@
-package edu.teco.guerillaSensing;
+package edu.teco.guerillaSensing.helpers;
 
 import android.content.Context;
 import android.location.GpsStatus;
@@ -6,22 +6,21 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.util.Log;
 
 /**
  * Singleton for managing user location.
+ * TODO: Currently not in use.
  */
 public class LocationHelper implements LocationListener, GpsStatus.Listener {
+
+    // The instance of the singleton. Will be null until it is first used.
     private static LocationHelper mInstance = null;
 
-    private String mString;
-
+    // The location manager, needed to request the user location.
     private LocationManager mLocationManager;
-    private Location location;
 
-    private LocationHelper(){
-       // Called when singleton is first created.
-    }
+    // The current user location
+    private Location mLocation;
 
     /**
      * Returns the location helper singleton object.
@@ -36,21 +35,32 @@ public class LocationHelper implements LocationListener, GpsStatus.Listener {
         return mInstance;
     }
 
+    /**
+     * Returns the current position. also registers for location updates.
+     * @param context The context.
+     * @return Current (last known) location of device or null, if GPS is disabled.
+     */
     public Location getLocation(Context context) {
         mLocationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
-        location = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        return location;
-
+        mLocation = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        return mLocation;
     }
 
+    /**
+     * Stops the location updates.
+     */
     public void stopLocationUpdates() {
         mLocationManager.removeUpdates(this);
     }
 
+    /**
+     * This is called when we get the first "fresh" location.
+     * We can now disable location updates.
+     * @param location
+     */
     @Override
     public void onLocationChanged(Location location) {
-        Log.d("location", location.getLatitude() + " " + location.getLongitude());
         mLocationManager.removeUpdates(this);
     }
 

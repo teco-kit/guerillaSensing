@@ -1,4 +1,4 @@
-package edu.teco.guerillaSensing;
+package edu.teco.guerillaSensing.adapters;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -9,20 +9,31 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import edu.teco.guerillaSensing.R;
+import edu.teco.guerillaSensing.data.CardMenuEntry;
+import edu.teco.guerillaSensing.data.MenuRecyclerTypes;
+
 /**
  * Adapter for the card view.
  * The view holder is also included in this class as a static nested class.
  */
 public class MenuCardAdapter extends RecyclerView.Adapter<MenuCardAdapter.ViewHolder> {
 
-    private static final int TYPE_HEADER = 0;
-    private static final int TYPE_ITEM = 1;
-    private static final int TYPE_SEPARATOR = 2;
+    private List<CardMenuEntry> mDeviceTypeList;
 
-    private List<StartMenuActivity.DeviceType> mDeviceTypeList;
-
-    public MenuCardAdapter(List<StartMenuActivity.DeviceType> deviceTypeList) {
+    public MenuCardAdapter(List<CardMenuEntry> deviceTypeList) {
         this.mDeviceTypeList = deviceTypeList;
+    }
+
+    // Adds item to list.
+    public void addItem(CardMenuEntry newItem) {
+        this.mDeviceTypeList.add(newItem);
+        this.notifyItemInserted(mDeviceTypeList.size() - 1);
+    }
+
+    // Notification that item has changed
+    public void hasChanged(int position) {
+        this.notifyItemChanged(position);
     }
 
     // Returns number of items in list.
@@ -42,22 +53,22 @@ public class MenuCardAdapter extends RecyclerView.Adapter<MenuCardAdapter.ViewHo
     // Depending on the type, different fields (references) are available.
     @Override
     public void onBindViewHolder(ViewHolder deviceTypeViewHolder, int position) {
-        StartMenuActivity.DeviceType item = mDeviceTypeList.get(position);
+        CardMenuEntry item = mDeviceTypeList.get(position);
 
         switch (item.getType()) {
-            case TYPE_HEADER:
-                deviceTypeViewHolder.mHeaderImageView.setImageResource(item.mHeaderImage);
-                deviceTypeViewHolder.mHeadLineView.setText(item.mHeadLine);
-                deviceTypeViewHolder.mSubLineView.setText(item.mSubLine);
+            case MenuRecyclerTypes.TYPE_HEADER:
+                deviceTypeViewHolder.mHeaderImageView.setImageResource(item.getHeaderImage());
+                deviceTypeViewHolder.mHeadLineView.setText(item.getHeadLine());
+                deviceTypeViewHolder.mSubLineView.setText(item.getSubLine());
                 break;
-            case TYPE_ITEM:
-                deviceTypeViewHolder.mPictureView.setImageResource(item.mPicture);
-                deviceTypeViewHolder.mNameView.setText(item.mName);
-                deviceTypeViewHolder.mVersionView.setText(item.mVersion);
-                deviceTypeViewHolder.mCreationDateView.setText(item.mCreationDate);
+            case MenuRecyclerTypes.TYPE_ITEM:
+                deviceTypeViewHolder.mPictureView.setImageResource(item.getPicture());
+                deviceTypeViewHolder.mNameView.setText(item.getFirstLine());
+                deviceTypeViewHolder.mVersionView.setText(item.getSecondLine());
+                deviceTypeViewHolder.mCreationDateView.setText(item.getThirdLine());
                 break;
-            case TYPE_SEPARATOR:
-                deviceTypeViewHolder.mSeparatorView.setText(item.mSeparator);
+            case MenuRecyclerTypes.TYPE_FOOTER:
+                deviceTypeViewHolder.mSeparatorView.setText(item.getFooterLine());
                 break;
             default:
                 break;
@@ -72,13 +83,13 @@ public class MenuCardAdapter extends RecyclerView.Adapter<MenuCardAdapter.ViewHo
         View itemView;
 
         switch (type) {
-            case TYPE_HEADER:
+            case MenuRecyclerTypes.TYPE_HEADER:
                 itemView = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.device_select_header, viewGroup, false);
                 break;
-            case TYPE_ITEM:
+            case MenuRecyclerTypes.TYPE_ITEM:
                 itemView = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.device_select, viewGroup, false);
                 break;
-            case TYPE_SEPARATOR:
+            case MenuRecyclerTypes.TYPE_FOOTER:
                 itemView = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.device_select_separator, viewGroup, false);
                 break;
             default:
@@ -88,6 +99,8 @@ public class MenuCardAdapter extends RecyclerView.Adapter<MenuCardAdapter.ViewHo
 
         return new ViewHolder(itemView, type);
     }
+
+
 
     /**
      * The view holder for the header, items and separators.
@@ -125,13 +138,13 @@ public class MenuCardAdapter extends RecyclerView.Adapter<MenuCardAdapter.ViewHo
 
             // Set references depending on type.
             switch (type) {
-                case TYPE_HEADER:
+                case MenuRecyclerTypes.TYPE_HEADER:
                     setReferencesForHeader(view);
                     break;
-                case TYPE_ITEM:
+                case MenuRecyclerTypes.TYPE_ITEM:
                     setReferencesForItem(view);
                     break;
-                case TYPE_SEPARATOR:
+                case MenuRecyclerTypes.TYPE_FOOTER:
                     setReferencesForSeparator(view);
                     break;
                 default:
@@ -161,7 +174,7 @@ public class MenuCardAdapter extends RecyclerView.Adapter<MenuCardAdapter.ViewHo
         }
 
         private void handleUnknownType(View view) {
-            // TODO: Handle somehow.
+            // Shouldn't happen.
         }
 
         public int getType() {

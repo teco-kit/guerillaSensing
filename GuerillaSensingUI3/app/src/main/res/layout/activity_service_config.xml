@@ -19,7 +19,7 @@
         <!-- The remaining content below the tool bar .-->
         <fragment
             android:id="@+id/map_select_pos"
-            class="edu.teco.guerillaSensing.config.SelectMetricActivity$SelectMetricFragment"
+            class="edu.teco.guerillaSensing.config.ServiceConfigActivity$ServiceConfigFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
 

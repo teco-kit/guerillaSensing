@@ -3,20 +3,24 @@
 
     <PreferenceCategory
         android:title="General">
+
         <CheckBoxPreference
             android:key="pref_use_gps"
             android:title="Enable GPS"
             android:summary="Allow the map to locate you"
             android:defaultValue="true"/>
+
         <CheckBoxPreference
             android:key="pref_show_scale"
             android:title="Show scale"
-            android:summary="Show a scale on the side of the map"
+            android:summary="Show a scale for the data as map overlay"
             android:defaultValue="true"/>
+
     </PreferenceCategory>
 
     <PreferenceCategory
         android:title="Heatmap">
+
         <CheckBoxPreference
             android:key="pref_show_heatmap"
             android:summary="Overlay the map with a heatmap"

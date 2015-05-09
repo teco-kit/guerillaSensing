@@ -1,15 +1,12 @@
-package edu.teco.guerillaSensing;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
-import android.animation.TimeInterpolator;
-import android.animation.ValueAnimator;
-import android.os.Handler;
+package edu.teco.guerillaSensing.adapters;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import edu.teco.guerillaSensing.R;
 
 public class DrawerAdapter extends RecyclerView.Adapter<DrawerAdapter.ViewHolder> {
 
@@ -30,7 +27,7 @@ public class DrawerAdapter extends RecyclerView.Adapter<DrawerAdapter.ViewHolder
     // ViewHolder are used to to store the inflated views in order to recycle them
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        int Holderid;
+        int HolderID;
 
         TextView textView;
         ImageView imageView;
@@ -47,13 +44,11 @@ public class DrawerAdapter extends RecyclerView.Adapter<DrawerAdapter.ViewHolder
             if (ViewType == TYPE_ITEM) {
                 textView = (TextView) itemView.findViewById(R.id.rowText); // Creating TextView object with the id of textView from item_row.xml
                 imageView = (ImageView) itemView.findViewById(R.id.rowIcon);// Creating ImageView object with the id of ImageView from item_row.xml
-                Holderid = 1;                                               // setting holder id as 1 as the object being populated are of type item row
+                HolderID = 1;                                               // setting holder id as 1 as the object being populated are of type item row
             } else {
-
-
                 Name = (TextView) itemView.findViewById(R.id.name);         // Creating Text View object from header.xml for name
                 email = (TextView) itemView.findViewById(R.id.email);       // Creating Text View object from header.xml for email
-                Holderid = 0;                                                // Setting holder id = 0 as the object being populated are of type header view
+                HolderID = 0;                                                // Setting holder id = 0 as the object being populated are of type header view
             }
         }
 
@@ -61,57 +56,13 @@ public class DrawerAdapter extends RecyclerView.Adapter<DrawerAdapter.ViewHolder
     }
 
 
-    DrawerAdapter(String Titles[], int Icons[], String Name, String Email) { // MyAdapter Constructor with titles and icons parameter
+    public DrawerAdapter(String Titles[], int Icons[], String Name, String Email) { // MyAdapter Constructor with titles and icons parameter
         // titles, icons, name, email, profile pic are passed from the main activity as we
         mNavTitles = Titles;                //have seen earlier
         mIcons = Icons;
         name = Name;
         email = Email;
 
-
-    }
-
-    private ObjectAnimator animation1;
-    private ObjectAnimator animation2;
-    public void animategroup1(int x, int y, Object val, int valx, int valy ){
-
-        System.out.println("animategroup1 entered here");
-        System.out.println("x:"+x);
-        System.out.println("y"+y);
-        System.out.println("valx"+valx);
-        System.out.println("valy"+valy);
-
-        animation1 = ObjectAnimator.ofFloat(val, "x", valx, x);
-
-        animation2 = ObjectAnimator.ofFloat(val, "y", valy, y);
-
-        AnimatorSet set = new AnimatorSet();
-
-
-        animation1.setDuration(3000);
-        animation1.setInterpolator(new TimeInterpolator() {
-            @Override
-            public float getInterpolation(float v) {
-                return (float) ((Math.sin(v * 2 * Math.PI - Math.PI / 2) + 1) / 2);
-            }
-        });
-
-        animation2.setDuration(849);
-        animation2.setInterpolator(new TimeInterpolator() {
-            @Override
-            public float getInterpolation(float v) {
-                return (float) ((Math.sin(v * 2 * Math.PI - Math.PI / 2) + 1) / 2);
-            }
-        });
-
-        animation1.setRepeatMode(ValueAnimator.RESTART);
-        animation1.setRepeatCount(ValueAnimator.INFINITE);
-        animation2.setRepeatMode(ValueAnimator.RESTART);
-        animation2.setRepeatCount(ValueAnimator.INFINITE);
-
-        set.playTogether(animation1, animation2);
-
-        set.start();
 
     }
 
@@ -141,16 +92,7 @@ public class DrawerAdapter extends RecyclerView.Adapter<DrawerAdapter.ViewHolder
 
             final View img = v.findViewById(R.id.name);
 
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    animategroup1((int) img.getX() + 460, (int) img.getY() + 30, img, (int) img.getX(), (int) img.getY());
-                }
-            }, 100);
-
             return vhHeader; //returning the object created
-
-
         }
         return null;
 
@@ -161,7 +103,7 @@ public class DrawerAdapter extends RecyclerView.Adapter<DrawerAdapter.ViewHolder
     // which view type is being created 1 for item row
     @Override
     public void onBindViewHolder(DrawerAdapter.ViewHolder holder, int position) {
-        if (holder.Holderid == 1) {                              // as the list view is going to be called after the header view so we decrement the
+        if (holder.HolderID == 1) {                              // as the list view is going to be called after the header view so we decrement the
             // position by 1 and pass it to the holder while setting the text and image
             holder.textView.setText(mNavTitles[position - 1]); // Setting the Text with the array of our Titles
             holder.imageView.setImageResource(mIcons[position - 1]);// Settimg the image with array of our icons

@@ -4,13 +4,12 @@
     <string name="app_name">GuerillaSensing</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
-    <string name="hello_blank_fragment_1">Hello blank fragment1</string>
-    <string name="hello_blank_fragment_2">Hello blank fragment2</string>
-    <string name="title_activity_start_menu">StartMenuActivity</string>
+    <string name="title_activity_start_menu">GuerillaSensing</string>
     <string name="title_activity_select_position">SelectPositionActivity</string>
     <string name="title_activity_navigation_draver">NavigationDraverActivity</string>
     <string name="title_activity_navigation_drawer">NavigationDrawerActivity</string>
     <string name="title_activity_select_env_board">SelectEnvBoardActivity</string>
     <string name="title_activity_select_metric">SelectMetricActivity</string>
+    <string name="title_activity_service_config">ServiceConfigActivity</string>
 
 </resources>

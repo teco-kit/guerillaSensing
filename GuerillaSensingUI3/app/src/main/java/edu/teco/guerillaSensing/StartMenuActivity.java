@@ -1,5 +1,7 @@
 package edu.teco.guerillaSensing;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -14,12 +16,14 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.teco.envboardservicelib.IEnvBoardService;
+import edu.teco.guerillaSensing.adapters.MenuCardAdapter;
+import edu.teco.guerillaSensing.data.CardMenuEntry;
+import edu.teco.guerillaSensing.data.MenuRecyclerTypes;
+import edu.teco.guerillaSensing.helpers.OnlineStatusHelper;
+
 
 public class StartMenuActivity extends NavigationDrawerActivity {
-
-    private static final int TYPE_HEADER = 0;
-    private static final int TYPE_ITEM = 1;
-    private static final int TYPE_SEPARATOR = 2;
 
     // Recycler view for the device type list.
     private RecyclerView mDeviceTypeRecycler;
@@ -27,102 +31,35 @@ public class StartMenuActivity extends NavigationDrawerActivity {
     // Adapter for the device type recycler.
     private MenuCardAdapter mDeviceTypeAdapter;
 
-    private List<DeviceType> mDeviceTypes;
-
-
-    // TODO: Change this mess to subclasses!
-    /**
-     * Device types, including header and separators in the list.
-     */
-    public class DeviceType {
-        // The data type (header, item or separator).
-        private int TYPE;
-
-        // For the "headers".
-        protected int mHeaderImage;
-        protected String mHeadLine;
-        protected String mSubLine;
-
-        // For the "items".
-        protected int mPicture;
-        protected String mName;
-        protected String mVersion;
-        protected String mCreationDate;
-
-        // For the "separators".
-        protected String mSeparator;
-
-        /**
-         * Constructor for the header.
-         * @param headerImage The header image.
-         * @param headLine The header head line.
-         * @param subLine The header sub line.
-         */
-        public DeviceType(int headerImage, String headLine, String subLine) {
-            this.TYPE = TYPE_HEADER;
-            this.mHeaderImage = headerImage;
-            this.mHeadLine = headLine;
-            this.mSubLine = subLine;
-        }
-
-        /**
-         * Constructor for device type.
-         * @param name The device name.
-         * @param version The device version.
-         * @param creationDate The device creation date.
-         * @param picture Reference to Drawable image of device.
-         */
-        public DeviceType(String name, String version, String creationDate, int picture) {
-            this.TYPE = TYPE_ITEM;
-            this.mPicture = picture;
-            this.mName = name;
-            this.mVersion = version;
-            this.mCreationDate = creationDate;
-        }
-
-        /**
-         * Constructor for the separator.
-         * @param separator
-         */
-        public DeviceType(String separator) {
-            this.TYPE = TYPE_SEPARATOR;
-            this.mSeparator = separator;
-        }
-
-        public int getType() {
-            return TYPE;
-        }
-    }
+    private List<CardMenuEntry> mDeviceTypes;
 
 
     private View mMainLayout;
+    private IEnvBoardService service;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mMainLayout = getLayoutInflater().inflate(R.layout.activity_start_menu, null);
-        initNavigationDrawer(mMainLayout);
+        initNavigationDrawer(mMainLayout, false);
         setTitle("GuerillaSensing");
-
 
         // Load device types from XML.
         // TODO: This has to be read out of XML files.
         // TODO: XML files should be downloaded from server.
         // TODO: Device images should also be downloaded, maybe from a public image hoster.
 
-        DeviceType header = new DeviceType(R.drawable.ic_add, "Main Menu","Welcome to the TECO Guerilla Sensing App. You are currently NOT connected to an EnvBoard.");
+        CardMenuEntry header = new CardMenuEntry(R.drawable.ic_add, "Main Menu","Welcome to the TECO Guerilla Sensing App. You are currently NOT connected to an EnvBoard.");
 
-        DeviceType c1 = new DeviceType("View Data", "View heatmap data", "Requires internet connection", R.drawable.bpart);
-        DeviceType c2 = new DeviceType("Add Data", "Read data from EnvBoard and upload it to the database", "Currently selected: 9B:1D:35:7C", R.drawable.bpart);
-        DeviceType c3 = new DeviceType("Configuration", "Change upload mode.", "", R.drawable.bpart);
-        DeviceType c0 = new DeviceType("For more option and help, please refer to the side menu.");
+        CardMenuEntry c1 = new CardMenuEntry("View Data", "View the collected data on a map", "Requires internet connection", R.drawable.main_menu_heatmap);
+        CardMenuEntry c2 = new CardMenuEntry("Connect EnvBoard", "Connect to and configure an EnvBoard", "Currently selected: 9B:1D:35:7C", R.drawable.main_menu_service);
+        CardMenuEntry c0 = new CardMenuEntry("For more options and help, please refer to the side menu.");
         mDeviceTypes = new ArrayList<>();
 
 
         mDeviceTypes.add(header);
         mDeviceTypes.add(c1);
         mDeviceTypes.add(c2);
-        mDeviceTypes.add(c3);
         mDeviceTypes.add(c0);
 
 
@@ -147,8 +84,6 @@ public class StartMenuActivity extends NavigationDrawerActivity {
             }
         });
 
-        //mDeviceTypeRecycler.addItemDecoration(new SimpleLineDecoration(getActivity()));
-
         mDeviceTypeRecycler.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
             @Override
             public boolean onInterceptTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
@@ -157,12 +92,56 @@ public class StartMenuActivity extends NavigationDrawerActivity {
                 if (child != null && mGestureDetector.onTouchEvent(motionEvent)) {
                     int childID = recyclerView.getChildPosition(child);
 
-                    if (mDeviceTypes.get(childID).getType() == TYPE_ITEM) {
+                    if (mDeviceTypes.get(childID).getType() == MenuRecyclerTypes.TYPE_ITEM) {
 
-                        Toast.makeText(StartMenuActivity.this, "Adding device of type \"" + mDeviceTypes.get(childID).mName + "\".", Toast.LENGTH_SHORT).show();
-                        Intent startAc = new Intent(StartMenuActivity.this, SelectPositionActivity.class);
+                        if (childID == 1) {
 
-                        startActivity(startAc);
+
+                            if (OnlineStatusHelper.getInstance().isOnline(StartMenuActivity.this)) {
+                                Intent startAc = new Intent(StartMenuActivity.this, MapViewActivity.class);
+                                startActivity(startAc);
+                            } else {
+                                new AlertDialog.Builder(StartMenuActivity.this)
+                                        .setTitle("You are offline")
+                                        .setMessage("To view heatmap data, please connect this device to the internet.")
+                                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                Intent startAc = new Intent(StartMenuActivity.this, MapViewActivity.class);
+                                                startActivity(startAc);
+                                            }
+                                        })
+                                        .setIcon(R.drawable.ic_map)
+                                        .show();
+                            }
+
+
+                        } else if (childID == 2) {
+                            if (OnlineStatusHelper.getInstance().isBluetoothAvailable()) {
+                                Intent startAc = new Intent(StartMenuActivity.this, SelectEnvBoardActivity.class);
+                                startActivity(startAc);
+                            } else {
+                                new AlertDialog.Builder(StartMenuActivity.this)
+                                        .setTitle("No Bluetooth")
+                                        .setMessage("This function requires Bluetooth. Do you want to turn it on?")
+                                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                // Enable bluetooth and start activity.
+                                                OnlineStatusHelper.getInstance().enableBluetooth();
+                                                Intent startAc = new Intent(StartMenuActivity.this, SelectEnvBoardActivity.class);
+                                                startActivity(startAc);
+                                            }
+                                        }).setNegativeButton("No", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        // Do nothing.
+                                    }
+                                })
+                                        .setIcon(R.drawable.ic_map)
+                                        .show();
+                            }
+                        }
+
+
+
                     }
 
                     return true;
@@ -189,11 +168,14 @@ public class StartMenuActivity extends NavigationDrawerActivity {
         setContentView(mMainLayout);
     }
 
-
+    @Override
+    public void drawerItemClicked(int item) {
+        Toast.makeText(this, "Opening " + item, Toast.LENGTH_SHORT).show();
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+       // getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
@@ -211,4 +193,5 @@ public class StartMenuActivity extends NavigationDrawerActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
 }

@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     card_view:cardCornerRadius="3dp"
     card_view:contentPadding="22dp"
-    android:background="#fffafafa"
+    card_view:cardBackgroundColor="#ffdddddd"
     android:layout_margin="13dp">
 
     <RelativeLayout

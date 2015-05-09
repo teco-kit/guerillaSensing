@@ -1,6 +1,6 @@
 package edu.teco.guerillaSensing;
 
-import android.content.Intent;
+import android.content.res.TypedArray;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
@@ -9,14 +9,13 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.GestureDetector;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Toast;
+
+import edu.teco.guerillaSensing.adapters.DrawerAdapter;
 
 
-public class NavigationDrawerActivity extends ActionBarActivity {
+public abstract class NavigationDrawerActivity extends ActionBarActivity {
 
     // The support app bar.
     private Toolbar mToolBar;
@@ -33,6 +32,9 @@ public class NavigationDrawerActivity extends ActionBarActivity {
     // App bar toggle icon ("hamburger").
     private ActionBarDrawerToggle mDrawerToggle;
 
+    // If this is false, the drawer and the toggle icon are not shown.
+    private boolean mShow;
+
     // Title
     private CharSequence mTitle;
 
@@ -40,13 +42,36 @@ public class NavigationDrawerActivity extends ActionBarActivity {
     private String TITLES[] = {"Map", "Login", "Add Device", "Edit Device", "Search Device", "BLE Service", "Config", "Contact", "Help"};
     private int ICONS[] = {R.drawable.ic_map, R.drawable.ic_login, R.drawable.ic_add, R.drawable.ic_edit, R.drawable.ic_search,
             R.drawable.ic_bluetooth, R.drawable.ic_config, R.drawable.ic_contact, R.drawable.ic_help};
-    private String NAME = "Vincent Diener";
-    private String EMAIL = "vincent.diener@gmail.com";
+    private String NAME = "Main menu headline";
+    private String EMAIL = "Main menu subline";
 
     // Gesture detector. Only detects single tap.
     private GestureDetector mGestureDetector;
 
-    protected void initNavigationDrawer(View mainView){
+    protected void setHeadline (String headline) {
+        this.NAME = headline;
+    }
+
+    protected void setSubline (String subline) {
+        this.EMAIL = subline;
+    }
+
+    protected void setEntries (String[] entries, TypedArray icons) {
+        this.TITLES = entries;
+
+        int size = icons.length();
+
+        int[] iconsArray = new int[size];
+        for(int i = 0; i < size; i++) {
+            iconsArray[i] = icons.getResourceId(i, 0);
+        }
+
+        this.ICONS = iconsArray;
+    }
+
+    protected void initNavigationDrawer(View mainView, boolean show){
+
+        this.mShow = show;
 
         mDrawerLayout = (DrawerLayout) mainView.findViewById(R.id.drawer_layout);
 
@@ -90,26 +115,16 @@ public class NavigationDrawerActivity extends ActionBarActivity {
         mSideMenuRecycler.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
             @Override
             public boolean onInterceptTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
+
+
                 View child = recyclerView.findChildViewUnder(motionEvent.getX(), motionEvent.getY());
 
                 if (child != null && mGestureDetector.onTouchEvent(motionEvent)) {
                     int childID = recyclerView.getChildPosition(child);
-                    if (childID == 0) {
-                        // Header was clicked.
-                        Toast.makeText(NavigationDrawerActivity.this, "Header clicked.", Toast.LENGTH_SHORT).show();
-                        mDrawerLayout.closeDrawers();
+                    drawerItemClicked(childID);
 
-                        Intent startAc = new Intent(NavigationDrawerActivity.this, SelectEnvBoardActivity.class);
-                        NavigationDrawerActivity.this.startActivity(startAc);
+                    mDrawerLayout.closeDrawers();
 
-
-                    } else {
-                        // Item was clicked.
-                        View v = mSideMenuRecycler.getChildAt(childID);
-                        //mSideMenuAdapter.removeAt(childID);
-                        mDrawerLayout.closeDrawers();
-                        Toast.makeText(NavigationDrawerActivity.this, "Opening \"" + TITLES[childID - 1] + "\"", Toast.LENGTH_SHORT).show();
-                    }
                     return true;
 
                 }
@@ -122,6 +137,7 @@ public class NavigationDrawerActivity extends ActionBarActivity {
 
             }
         });
+
 
 
 
@@ -143,15 +159,20 @@ public class NavigationDrawerActivity extends ActionBarActivity {
                 // Drawer was closed.
             }
         };
+        if (mShow) {
+            mDrawerLayout.setDrawerListener(mDrawerToggle); // Drawer Listener set to the Drawer toggle
+            mDrawerToggle.syncState();               // Finally we set the drawer toggle sync State
 
-        mDrawerLayout.setDrawerListener(mDrawerToggle); // Drawer Listener set to the Drawer toggle
-        mDrawerToggle.syncState();               // Finally we set the drawer toggle sync State
-
-        // Allow swipes to open the drawer.
-        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+            // Allow swipes to open the drawer.
+            mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+        } else {
+            mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        }
 
 
     }
+
+    public abstract void drawerItemClicked(int item);
 
     @Override
     public void setTitle(CharSequence title) {
@@ -159,25 +180,5 @@ public class NavigationDrawerActivity extends ActionBarActivity {
         getSupportActionBar().setTitle(mTitle);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_navigation_drawer, menu);
-        return true;
-    }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 }

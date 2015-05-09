@@ -1,13 +1,13 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="edu.teco.guerillaSensing.SelectPositionActivity">
+    tools:context="edu.teco.guerillaSensing.MapViewActivity">
 
     <item
         android:id="@+id/action_metric"
         android:orderInCategory="200"
         android:title="Search"
-        android:icon="@drawable/ic_search_w"
+        android:icon="@drawable/ic_config_w"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/action_time"

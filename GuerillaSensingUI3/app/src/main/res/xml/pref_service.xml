@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="Service">
+
+        <CheckBoxPreference
+            android:key="pref_upload_mode_wifi_only"
+            android:title="Only WiFi"
+            android:summary="Only upload data when on WiFi"
+            android:defaultValue="true"/>
+        <EditTextPreference
+            android:defaultValue="10"
+            android:dialogTitle="Measurement interval"
+            android:inputType="number"
+            android:key="pref_measurement_interval"
+            android:summary="Set the interval (in minutes) at which the EnvBoard will make measurements"
+            android:title="EnvBoard measurement interval" />
+    </PreferenceCategory>
+
+</PreferenceScreen>
