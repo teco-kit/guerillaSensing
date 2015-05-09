@@ -1,5 +1,6 @@
 package edu.teco.guerillaSensing;
 
+import android.app.NotificationManager;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -12,6 +13,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.GestureDetector;
@@ -35,36 +37,51 @@ import edu.teco.guerillaSensing.helpers.OnlineStatusHelper;
 
 public class SelectEnvBoardActivity extends NavigationDrawerActivity implements ServiceConnection, IServiceCallback {
 
-
-    // Recycler view for the device type list.
-    private RecyclerView mDeviceTypeRecycler;
-
-    // Adapter for the device type recycler.
-    private MenuCardAdapter mDeviceTypeAdapter;
-
-    private List<CardMenuEntry> mDeviceTypes;
-
-
+    // The main view of this activity.
     private View mMainLayout;
+
+    // The EnvBoard service.
     private IEnvBoardService service;
+
+    // Recycler view for menu list.
+    private RecyclerView mMenuEntriesRecycler;
+
+    // Adapter for the menu list recycler.
+    private MenuCardAdapter mMenuEntriesAdapter;
+
+    // List of menu entries in the main menu.
+    private List<CardMenuEntry> mMenuEntries;
+
+    // The header entry in the menu, used to show status info.
     private CardMenuEntry header;
+
+    // Boolean indicating if the bluetooth scan has already been started.
     private boolean mIsScanning;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Get main layout and initialize nav drawer on it.
         mMainLayout = getLayoutInflater().inflate(R.layout.activity_start_menu, null);
         initNavigationDrawer(mMainLayout, false);
         setTitle("Select EnvBoard");
         setContentView(mMainLayout);
-
-
-
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+
+        NotificationCompat.Builder mBuilder =     new NotificationCompat.Builder(this)
+                .setSmallIcon(R.drawable.ic_bluetooth)
+                .setContentTitle("My notification")
+                .setContentText("Hello World!");
+
+        int mNotificationId = 001;
+        NotificationManager mNotifyMgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
+        mNotifyMgr.notify(mNotificationId, mBuilder.build());
 
         // When activity is resumed, no scan is in progress.
         mIsScanning = false;
@@ -78,26 +95,31 @@ public class SelectEnvBoardActivity extends NavigationDrawerActivity implements 
         startService(startServiceIntent);
         bindService(startServiceIntent, this, BIND_AUTO_CREATE);
 
+        // Header indicates that Bluetooth scan has been started.
         header = new CardMenuEntry(R.drawable.ic_add, "Scanning...","Please wait while we scan for EnvBoards");
 
-        CardMenuEntry c1 = new CardMenuEntry("Stop data collection", "Stops the background data collection", "", R.drawable.main_menu_no_bt);
-        mDeviceTypes = new ArrayList<>();
-        mDeviceTypes.add(header);
-        mDeviceTypes.add(c1);
+        // First menu entry: Stop measurements.
+        CardMenuEntry menuEntryStopMeasurements = new CardMenuEntry("Stop data collection", "Stops the background data collection", "", R.drawable.main_menu_no_bt);
+
+        // Add entries to menu.
+        mMenuEntries = new ArrayList<>();
+        mMenuEntries.add(header);
+        mMenuEntries.add(menuEntryStopMeasurements);
 
         // Create adapter.
-        mDeviceTypeAdapter = new MenuCardAdapter(mDeviceTypes);
+        mMenuEntriesAdapter = new MenuCardAdapter(mMenuEntries);
 
         // Set recycler view to vertical.
-        mDeviceTypeRecycler = (RecyclerView) mMainLayout.findViewById(R.id.main_menu_card_view);
+        mMenuEntriesRecycler = (RecyclerView) mMainLayout.findViewById(R.id.main_menu_card_view);
         LinearLayoutManager llm = new LinearLayoutManager(this);
         llm.setOrientation(LinearLayoutManager.VERTICAL);
-        mDeviceTypeRecycler.setLayoutManager(llm);
+        mMenuEntriesRecycler.setLayoutManager(llm);
 
         // Set recycler view adapter.
-        mDeviceTypeRecycler.setAdapter(mDeviceTypeAdapter);
+        mMenuEntriesRecycler.setAdapter(mMenuEntriesAdapter);
 
 
+        // Gesture detector to detect single tap movements on the menu items.
         final GestureDetector mGestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onSingleTapUp(MotionEvent e) {
@@ -105,32 +127,39 @@ public class SelectEnvBoardActivity extends NavigationDrawerActivity implements 
             }
         });
 
-        mDeviceTypeRecycler.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
+        // Menu item touch listener.
+        mMenuEntriesRecycler.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
             @Override
             public boolean onInterceptTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
+                // Get clicked view. If none was clicked, this might be null.
                 View child = recyclerView.findChildViewUnder(motionEvent.getX(), motionEvent.getY());
 
                 if (child != null && mGestureDetector.onTouchEvent(motionEvent)) {
+                    // A view in the menu was clicked. get the ID.
                     int childID = recyclerView.getChildPosition(child);
 
-                    if (mDeviceTypes.get(childID).getType() == MenuRecyclerTypes.TYPE_ITEM) {
+                    // Check if the clicked view was a menu item (might have been header or footer).
+                    if (mMenuEntries.get(childID).getType() == MenuRecyclerTypes.TYPE_ITEM) {
 
+                        // Check ID and handle accordingly.
                         if (childID == 1) {
+                            // ID 1 stops measurements
                             try {
                                 service.stopMeasurement();
+                                Toast.makeText(SelectEnvBoardActivity.this, "Measurements stopped.", Toast.LENGTH_SHORT).show();
                             } catch (RemoteException e) {
                                 e.printStackTrace();
                             }
 
                         } else {
-
+                            // All other IDs are EnvBoards. Clicking them will start measurements with the
+                            // upload mode and interval set in the preferences.
                             try {
-                                service.startMeasurement(mDeviceTypes.get(childID).getSecondLine());
-
+                                // Start measurements. Interval is given in minutes, so we multiply by 60.
+                                service.startMeasurement(mMenuEntries.get(childID).getSecondLine());
                                 SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(SelectEnvBoardActivity.this);
                                 service.setMeasurementInterval(60 * preferences.getInt("pref_measurement_interval", 10));
-
-                                Toast.makeText(SelectEnvBoardActivity.this, "Device \"" + mDeviceTypes.get(childID).getSecondLine()
+                                Toast.makeText(SelectEnvBoardActivity.this, "Device \"" + mMenuEntries.get(childID).getSecondLine()
                                         + "\" is now active.", Toast.LENGTH_SHORT).show();
                             } catch (RemoteException e) {
                                 e.printStackTrace();
@@ -138,24 +167,33 @@ public class SelectEnvBoardActivity extends NavigationDrawerActivity implements 
 
                         }
                     }
-
+                    // Menu item was clicked.
                     return true;
-
                 }
-
+                // No menu item was clicked.
                 return false;
             }
 
             @Override
-            public void onTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
-
-            }
+            public void onTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) { }
         });
     }
 
     @Override
-    public void drawerItemClicked(int item) {
-        Toast.makeText(this, "Opening " + item, Toast.LENGTH_SHORT).show();
+    protected void onPause() {
+        super.onPause();
+
+        // Cancel Bluetooth device discovery if activity is paused.
+        if (this.service != null) {
+            try {
+                this.service.cancelDiscovery();
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+
+        // Unregister Bluetooth broadcast receiver.
+        unregisterReceiver(mReceiver);
     }
 
     @Override
@@ -181,25 +219,6 @@ public class SelectEnvBoardActivity extends NavigationDrawerActivity implements 
         return super.onOptionsItemSelected(item);
     }
 
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-        //Intent stopServiceIntent = new Intent(this, EnvBoardService.class);
-        //stopService(stopServiceIntent);
-        if (this.service != null) {
-            try {
-                this.service.cancelDiscovery();
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
-        }
-
-        unbindService(this);
-        unregisterReceiver(mReceiver);
-    }
-
     /**
      * Called when a connection to the Service has been established, with
      * the {@link IBinder} of the communication channel to the
@@ -211,9 +230,11 @@ public class SelectEnvBoardActivity extends NavigationDrawerActivity implements 
      */
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
+        // Get service.
         this.service = IEnvBoardService.Stub.asInterface((IBinder) service);
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
+        // Register callbacks and set upload mode.
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         try {
             this.service.registerServiceCallback(this);
             this.service.setUploadMode(preferences.getBoolean("pref_upload_mode_wifi_only", true));
@@ -221,6 +242,7 @@ public class SelectEnvBoardActivity extends NavigationDrawerActivity implements 
             e.printStackTrace();
         }
 
+        // Start scan for Bluetooth devices.
         startBluetoothScanIfReady();
     }
 
@@ -236,7 +258,6 @@ public class SelectEnvBoardActivity extends NavigationDrawerActivity implements 
      */
     @Override
     public void onServiceDisconnected(ComponentName name) {
-
         this.service = null;
     }
 
@@ -246,18 +267,20 @@ public class SelectEnvBoardActivity extends NavigationDrawerActivity implements 
     @Override
     public void discoveryFinished(String[] list) throws RemoteException {
         if (list == null || list.length == 0) {
+            // No EnvBoards found.
             header.setHeadLine("Scan done");
             header.setSubLine("No EnvBoards could be found. Please check if your EnvBoard is turned on and near enough to the smartphone.");
-            mDeviceTypeAdapter.hasChanged(0);
+            mMenuEntriesAdapter.hasChanged(0);
         } else {
+            // EnvBoards found. Show in list and make sure the adapter is updated.
             for (String device : list) {
                 header.setHeadLine("Scan done");
                 header.setSubLine("Please select one of the following EnvBoards. By doing so, this app " +
                         "will periodically read out the sensor values and pass them to the server once your smartphone has WiFi.");
-                mDeviceTypeAdapter.hasChanged(0);
+                mMenuEntriesAdapter.hasChanged(0);
 
                 CardMenuEntry newItem = new CardMenuEntry("EnvBoard", device, "Currently not connected", R.drawable.main_menu_service);
-                mDeviceTypeAdapter.addItem(newItem);
+                mMenuEntriesAdapter.addItem(newItem);
             }
         }
     }
@@ -292,11 +315,15 @@ public class SelectEnvBoardActivity extends NavigationDrawerActivity implements 
         return null;
     }
 
+    /**
+     * Broadcasts are received when the Bluetooth status changes.
+     */
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            final String action = intent.getAction();
 
+            // Bluetooth event occurred. Check type and handle accordingly.
+            final String action = intent.getAction();
             if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
                 final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,
                         BluetoothAdapter.ERROR);
@@ -333,5 +360,8 @@ public class SelectEnvBoardActivity extends NavigationDrawerActivity implements 
             }
         }
     }
+
+    @Override
+    public void drawerItemClicked(int item) { }
 
 }

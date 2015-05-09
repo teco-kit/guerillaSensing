@@ -92,10 +92,9 @@ public class MapViewActivity extends NavigationDrawerActivity implements GoogleM
         this.setSubline("Please select a metric");
         String[] allMetrics = getResources().getStringArray(R.array.array_metrics_string);
         TypedArray allMetricIcons = getResources().obtainTypedArray(R.array.array_metrics_icon);
-
         this.setEntries(allMetrics, allMetricIcons);
-
         initNavigationDrawer(mMainLayout, true);
+
         setContentView(mMainLayout);
 
         // Get MapFragment from support library to stay compatible.

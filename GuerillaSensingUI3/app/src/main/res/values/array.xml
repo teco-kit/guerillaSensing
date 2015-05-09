@@ -29,15 +29,15 @@
 
     <array
         name="array_metrics_icon">
-        <item>@drawable/ic_add</item>
-        <item>@drawable/ic_add</item>
-        <item>@drawable/ic_add</item>
-        <item>@drawable/ic_add</item>
-        <item>@drawable/ic_add</item>
-        <item>@drawable/ic_add</item>
-        <item>@drawable/ic_add</item>
-        <item>@drawable/ic_add</item>
-        <item>@drawable/ic_add</item>
+        <item>@drawable/ic_nature</item>
+        <item>@drawable/ic_nature</item>
+        <item>@drawable/ic_nature</item>
+        <item>@drawable/ic_nature</item>
+        <item>@drawable/ic_nature</item>
+        <item>@drawable/ic_nature</item>
+        <item>@drawable/ic_nature</item>
+        <item>@drawable/ic_nature</item>
+        <item>@drawable/ic_nature</item>
     </array>
 
     <string-array name="scale_labels">

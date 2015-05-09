@@ -8,6 +8,10 @@ import android.widget.TextView;
 
 import edu.teco.guerillaSensing.R;
 
+/**
+ * Adapter for the navigation drawer
+ * The view holder is also included in this class as a static nested class.
+ */
 public class DrawerAdapter extends RecyclerView.Adapter<DrawerAdapter.ViewHolder> {
 
     // When inflating the items, we have to distinguish between the regular items and the header.
@@ -15,113 +19,120 @@ public class DrawerAdapter extends RecyclerView.Adapter<DrawerAdapter.ViewHolder
     private static final int TYPE_HEADER = 0;
     private static final int TYPE_ITEM = 1;
 
-    private String mNavTitles[]; // String Array to store the passed titles Value from MainActivity.java
-    private int mIcons[];       // Int Array to store the passed icons resource value from MainActivity.java
+    // String array to store the passed titles.
+    private String mNavTitles[];
 
-    private String name;        //String Resource for header View Name
-    private int profile;        //int Resource for header view profile picture
-    private String email;       //String Resource for header view email
+    // Integer array to store the passed icon resources.
+    private int mIcons[];
 
+    // Headline, shown in the header.
+    private String mHeadline;
 
-    // Creating a ViewHolder which extends the RecyclerView View Holder
-    // ViewHolder are used to to store the inflated views in order to recycle them
+    // Subline, shown in the header.
+    private String mSubline;
 
+    /**
+     * The ViewHolder which extends the RecyclerView View Holder.
+     * ViewHolders are used to to store the inflated views in order to recycle them so we don't have
+     * to inflate views multiple times.
+     */
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        int HolderID;
+        // The view holder type. Can be TYPE_HEADER (=0) or TYPE_ITEM (=1).
+        int mHolderType;
 
-        TextView textView;
-        ImageView imageView;
-        TextView Name;
-        TextView email;
+        // The views for headers. They will be inflated.
+        TextView mHeadLineView;
+        TextView mSubLineView;
+
+        // The views for menu items. They will be inflated.
+        ImageView mIconView;
+        TextView mMenuEntryView;
 
 
-        public ViewHolder(View itemView, int ViewType) {                 // Creating ViewHolder Constructor with View and viewType As a parameter
+        /**
+         * Constructor for the ViewHolder.
+         * @param itemView The inflated view.
+         * @param viewType The type of the view.
+         */
+        public ViewHolder(View itemView, int viewType) {
             super(itemView);
 
-
-            // Here we set the appropriate view in accordance with the the view type as passed when the holder object is created
-
-            if (ViewType == TYPE_ITEM) {
-                textView = (TextView) itemView.findViewById(R.id.rowText); // Creating TextView object with the id of textView from item_row.xml
-                imageView = (ImageView) itemView.findViewById(R.id.rowIcon);// Creating ImageView object with the id of ImageView from item_row.xml
-                HolderID = 1;                                               // setting holder id as 1 as the object being populated are of type item row
-            } else {
-                Name = (TextView) itemView.findViewById(R.id.name);         // Creating Text View object from header.xml for name
-                email = (TextView) itemView.findViewById(R.id.email);       // Creating Text View object from header.xml for email
-                HolderID = 0;                                                // Setting holder id = 0 as the object being populated are of type header view
+            // Set the references to the subviews, depending on the type.
+            if (viewType == TYPE_ITEM) {
+                mMenuEntryView = (TextView) itemView.findViewById(R.id.rowText);
+                mIconView = (ImageView) itemView.findViewById(R.id.rowIcon);
+                mHolderType = TYPE_ITEM;
+            } else if (viewType == TYPE_HEADER) {
+                mHeadLineView = (TextView) itemView.findViewById(R.id.drawer_header_headline);
+                mSubLineView = (TextView) itemView.findViewById(R.id.drawer_header_subline);
+                mHolderType = TYPE_HEADER;
             }
         }
-
-
     }
 
 
-    public DrawerAdapter(String Titles[], int Icons[], String Name, String Email) { // MyAdapter Constructor with titles and icons parameter
-        // titles, icons, name, email, profile pic are passed from the main activity as we
-        mNavTitles = Titles;                //have seen earlier
-        mIcons = Icons;
-        name = Name;
-        email = Email;
-
-
+    /**
+     * Constructor for the {@link DrawerAdapter} which holds the data for the navigation drawer.
+     * @param navTitles The menu entries.
+     * @param icons The menu icons.
+     * @param headLine The header headline.
+     * @param subLine The header subline.
+     */
+    public DrawerAdapter(String navTitles[], int icons[], String headLine, String subLine) {
+        mNavTitles = navTitles;
+        mIcons = icons;
+        mHeadline = headLine;
+        mSubline = subLine;
     }
 
-
-    //Below first we ovverride the method onCreateViewHolder which is called when the ViewHolder is
-    //Created, In this method we inflate the item_row.xml layout if the viewType is Type_ITEM or else we inflate header.xml
-    // if the viewType is TYPE_HEADER
-    // and pass it to the view holder
-
+    // Called when the RecyclerView needs a new ViewHolder of the given type.
     @Override
     public DrawerAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
         if (viewType == TYPE_ITEM) {
-            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.drawer_row, parent, false); //Inflating the layout
+            // Inflate type ITEM.
+            View inflated = LayoutInflater.from(parent.getContext()).inflate(R.layout.drawer_row, parent, false);
 
-            ViewHolder vhItem = new ViewHolder(v, viewType); //Creating ViewHolder and passing the object of type view
-
-            return vhItem; // Returning the created object
-
-            //inflate your layout and pass it to view holder
+            // Put it in ViewHolder together with its type and return it.
+            return new ViewHolder(inflated, viewType);
 
         } else if (viewType == TYPE_HEADER) {
+            // Inflate type ITEM.
+            View inflated = LayoutInflater.from(parent.getContext()).inflate(R.layout.drawer_header, parent, false);
 
-            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.drawer_header, parent, false); //Inflating the layout
-
-            ViewHolder vhHeader = new ViewHolder(v, viewType); //Creating ViewHolder and passing the object of type view
-
-            final View img = v.findViewById(R.id.name);
-
-            return vhHeader; //returning the object created
+            // Put it in ViewHolder together with its type and return it.
+            return new ViewHolder(inflated, viewType);
         }
-        return null;
 
+        // Unknown type. This should not happen.
+        return null;
     }
 
-    //Next we override a method which is called when the item in a row is needed to be displayed, here the int position
-    // Tells us item at which position is being constructed to be displayed and the holder id of the holder object tell us
-    // which view type is being created 1 for item row
+
+    // Called when the item at the given position needs to be displayed.
+    // To display it, we're given a ViewHolde. Now we just need to set the contents.
     @Override
     public void onBindViewHolder(DrawerAdapter.ViewHolder holder, int position) {
-        if (holder.HolderID == 1) {                              // as the list view is going to be called after the header view so we decrement the
-            // position by 1 and pass it to the holder while setting the text and image
-            holder.textView.setText(mNavTitles[position - 1]); // Setting the Text with the array of our Titles
-            holder.imageView.setImageResource(mIcons[position - 1]);// Settimg the image with array of our icons
-        } else {
-
-            holder.Name.setText(name);
-            holder.email.setText(email);
+        // Set contents depending on type.
+        if (holder.mHolderType == TYPE_ITEM) {
+            // Subtract one for header.
+            holder.mMenuEntryView.setText(mNavTitles[position - 1]);
+            holder.mIconView.setImageResource(mIcons[position - 1]);
+        } else if (holder.mHolderType == TYPE_HEADER) {
+            holder.mHeadLineView.setText(mHeadline);
+            holder.mSubLineView.setText(mSubline);
         }
     }
 
-    // This method returns the number of items present in the list
+    // Returns the number of items in the list.
     @Override
     public int getItemCount() {
-        return mNavTitles.length + 1; // the number of items in the list will be +1 the titles including the header view.
+        // Add one for the header.
+        return mNavTitles.length + 1;
     }
 
 
-    // Witht the following method we check what type of view is being passed
+    // Returns the type of the item at the given position.
     @Override
     public int getItemViewType(int position) {
         if (isPositionHeader(position))
@@ -130,17 +141,20 @@ public class DrawerAdapter extends RecyclerView.Adapter<DrawerAdapter.ViewHolder
         return TYPE_ITEM;
     }
 
+    /**
+     * Returns true if the item at the given position is the header.
+     * @param position The position of the item to check.
+     * @return True if the item is the header, false otherwise.
+     */
     private boolean isPositionHeader(int position) {
         return position == 0;
     }
 
-    public void changeAt(int position) {
-        mNavTitles[position - 1] = "ddd";
-        notifyItemChanged(position);
-    }
-
+    /**
+     * Removes item at given position from the menu.
+     * @param position The position of the item to remove.
+     */
     public void removeAt(int position) {
-
         int n = 0;
         String[] newNavTitles = new String[mNavTitles.length - 1];
         int[] newIcons = new int[mIcons.length - 1];

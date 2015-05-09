@@ -22,61 +22,57 @@ import edu.teco.guerillaSensing.data.CardMenuEntry;
 import edu.teco.guerillaSensing.data.MenuRecyclerTypes;
 import edu.teco.guerillaSensing.helpers.OnlineStatusHelper;
 
-
+/**
+ * The startup activity, showing the start menu.
+ */
 public class StartMenuActivity extends NavigationDrawerActivity {
 
-    // Recycler view for the device type list.
-    private RecyclerView mDeviceTypeRecycler;
-
-    // Adapter for the device type recycler.
-    private MenuCardAdapter mDeviceTypeAdapter;
-
-    private List<CardMenuEntry> mDeviceTypes;
-
-
+    // The main view of this activity.
     private View mMainLayout;
-    private IEnvBoardService service;
+
+    // Recycler view for menu list.
+    private RecyclerView mMenuEntriesRecycler;
+
+    // Adapter for the menu list recycler.
+    private MenuCardAdapter mMenuEntriesAdapter;
+
+    // List of menu entries in the main menu.
+    private List<CardMenuEntry> mMenuEntries;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Get main layout and initialize nav drawer on it.
         mMainLayout = getLayoutInflater().inflate(R.layout.activity_start_menu, null);
         initNavigationDrawer(mMainLayout, false);
+
         setTitle("GuerillaSensing");
 
-        // Load device types from XML.
-        // TODO: This has to be read out of XML files.
-        // TODO: XML files should be downloaded from server.
-        // TODO: Device images should also be downloaded, maybe from a public image hoster.
-
+        // Add menu entries to the main menu.
         CardMenuEntry header = new CardMenuEntry(R.drawable.ic_add, "Main Menu","Welcome to the TECO Guerilla Sensing App. You are currently NOT connected to an EnvBoard.");
-
         CardMenuEntry c1 = new CardMenuEntry("View Data", "View the collected data on a map", "Requires internet connection", R.drawable.main_menu_heatmap);
-        CardMenuEntry c2 = new CardMenuEntry("Connect EnvBoard", "Connect to and configure an EnvBoard", "Currently selected: 9B:1D:35:7C", R.drawable.main_menu_service);
+        CardMenuEntry c2 = new CardMenuEntry("Connect EnvBoard", "Connect to and configure an EnvBoard", "Requires Bluetooth", R.drawable.main_menu_service);
         CardMenuEntry c0 = new CardMenuEntry("For more options and help, please refer to the side menu.");
-        mDeviceTypes = new ArrayList<>();
+        mMenuEntries = new ArrayList<>();
+        mMenuEntries.add(header);
+        mMenuEntries.add(c1);
+        mMenuEntries.add(c2);
+        mMenuEntries.add(c0);
 
-
-        mDeviceTypes.add(header);
-        mDeviceTypes.add(c1);
-        mDeviceTypes.add(c2);
-        mDeviceTypes.add(c0);
-
-
-
-        // Create adapter.
-        mDeviceTypeAdapter = new MenuCardAdapter(mDeviceTypes);
+        // Create adapter for the main menu.
+        mMenuEntriesAdapter = new MenuCardAdapter(mMenuEntries);
 
         // Set recycler view to vertical.
-        mDeviceTypeRecycler = (RecyclerView) mMainLayout.findViewById(R.id.main_menu_card_view);
+        mMenuEntriesRecycler = (RecyclerView) mMainLayout.findViewById(R.id.main_menu_card_view);
         LinearLayoutManager llm = new LinearLayoutManager(this);
         llm.setOrientation(LinearLayoutManager.VERTICAL);
-        mDeviceTypeRecycler.setLayoutManager(llm);
+        mMenuEntriesRecycler.setLayoutManager(llm);
 
         // Set recycler view adapter.
-        mDeviceTypeRecycler.setAdapter(mDeviceTypeAdapter);
+        mMenuEntriesRecycler.setAdapter(mMenuEntriesAdapter);
 
-
+        // Gesture detector to detect single tap movements on the menu items.
         final GestureDetector mGestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onSingleTapUp(MotionEvent e) {
@@ -84,19 +80,23 @@ public class StartMenuActivity extends NavigationDrawerActivity {
             }
         });
 
-        mDeviceTypeRecycler.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
+        // Menu item touch listener.
+        mMenuEntriesRecycler.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
             @Override
             public boolean onInterceptTouchEvent(RecyclerView recyclerView, MotionEvent motionEvent) {
+                // Get clicked view. If none was clicked, this might be null.
                 View child = recyclerView.findChildViewUnder(motionEvent.getX(), motionEvent.getY());
 
                 if (child != null && mGestureDetector.onTouchEvent(motionEvent)) {
+                    // A view in the menu was clicked. get the ID.
                     int childID = recyclerView.getChildPosition(child);
 
-                    if (mDeviceTypes.get(childID).getType() == MenuRecyclerTypes.TYPE_ITEM) {
+                    // Check if the clicked view was a menu item (might have been header or footer).
+                    if (mMenuEntries.get(childID).getType() == MenuRecyclerTypes.TYPE_ITEM) {
 
+                        // Check ID and handle accordingly.
                         if (childID == 1) {
-
-
+                            // ID 1 starts the map view but shows the user an alert if the device is offline.
                             if (OnlineStatusHelper.getInstance().isOnline(StartMenuActivity.this)) {
                                 Intent startAc = new Intent(StartMenuActivity.this, MapViewActivity.class);
                                 startActivity(startAc);
@@ -116,6 +116,7 @@ public class StartMenuActivity extends NavigationDrawerActivity {
 
 
                         } else if (childID == 2) {
+                            // ID 2 starts the EnvBoard scan activity, but prompts the user if Bluetooth is turned off.
                             if (OnlineStatusHelper.getInstance().isBluetoothAvailable()) {
                                 Intent startAc = new Intent(StartMenuActivity.this, SelectEnvBoardActivity.class);
                                 startActivity(startAc);
@@ -132,22 +133,16 @@ public class StartMenuActivity extends NavigationDrawerActivity {
                                             }
                                         }).setNegativeButton("No", new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int which) {
-                                        // Do nothing.
+                                        // If the user doesn't want to enable Bluetooth, do nothing.
                                     }
                                 })
-                                        .setIcon(R.drawable.ic_map)
-                                        .show();
+                                .setIcon(R.drawable.ic_map)
+                                .show();
                             }
                         }
-
-
-
                     }
-
                     return true;
-
                 }
-
                 return false;
             }
 
@@ -157,41 +152,9 @@ public class StartMenuActivity extends NavigationDrawerActivity {
             }
         });
 
-
-
-
-
-
-
-
-
         setContentView(mMainLayout);
     }
 
     @Override
-    public void drawerItemClicked(int item) {
-        Toast.makeText(this, "Opening " + item, Toast.LENGTH_SHORT).show();
-    }
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-       // getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
+    public void drawerItemClicked(int item) { }
 }
